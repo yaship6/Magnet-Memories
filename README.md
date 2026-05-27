@@ -1,73 +1,88 @@
-# React + TypeScript + Vite
+# ✨ The Memory Magnets
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Turn your favorite memories into beautiful customized magnets 🧲💖
 
-Currently, two official plugins are available:
+The Memory Magnets is an AI-powered custom magnet ordering platform where users can:
+- 📸 Upload photos
+- 🧲 Customize magnets
+- 🛒 Place orders
+- 🤖 Chat with an AI assistant
+- 📊 View analytics and dashboards
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+This project combines luxury UI/UX, full-stack development, and AI features into a modern startup-style platform 🚀
 
-## React Compiler
+# 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🎨 Frontend
+- ⚛️ React
+- 📘 TypeScript
+- 🎨 Tailwind CSS
+- ✨ Framer Motion
+- 🧭 React Router DOM
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## ⚙️ Backend
+- 🟢 Node.js
+- 🚂 Express.js
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🗄️ Databases
+- 🍃 MongoDB
+- 🐘 PostgreSQL
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🤖 AI Service
+- 🐍 Python
+- ⚡ FastAPI
+- 🧠 TensorFlow / CNN
+- 👁️ OpenCV
+- 📈 Pandas
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+# 🌟 Features
+
+- 🏠 Modern animated landing page
+- 🧲 Product collections
+- 🎨 Magnet customization page
+- 📸 Photo upload + live preview
+- 🛒 Cart and order system
+- 🤖 Smart chatbot assistant
+- 🏢 Society stall booking
+- 👤 User dashboard
+- 🛠️ Admin dashboard
+- 📊 Sales analytics dashboard
+- 🧠 AI image quality checker
+- 🎯 Magnet recommendation system
+
+---
+
+# 📁 Project Structure
+
+```txt
+memory-magnets/
+├── frontend/
+├── backend/
+├── ai-service/
+├── database/
+└── README.md
+
+WorkFlow:
+User opens website
+↓
+Views magnet collections
+↓
+Customizes magnet
+↓
+Uploads photo
+↓
+Places order
+↓
+Chatbot helps user
+↓
+Order is saved in backend
+↓
+Admin views and manages order
