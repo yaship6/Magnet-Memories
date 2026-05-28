@@ -10,6 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envFile = path.join(__dirname, ".env");
 const app = express();
 const port = process.env.PORT || 4000;
+const backendVersion = "2026-05-29-signup-direct-response";
 
 async function loadEnvFile() {
   try {
@@ -392,6 +393,7 @@ app.get("/api/health", (_request, response) => {
 app.get("/api/config-check", (_request, response) => {
   response.json({
     ok: true,
+    backendVersion,
     supabaseUrlConfigured: Boolean(process.env.SUPABASE_URL),
     supabaseServiceRoleConfigured: Boolean(
       process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -439,7 +441,14 @@ app.post("/api/auth/signup", async (request, response) => {
 
     await createSupabaseCustomer(user);
 
-    return response.status(201).json({ user: toPublicUser(user) });
+    return response.status(201).json({
+      user: {
+        id: user.id,
+        name,
+        email: gmail,
+        gmail,
+      },
+    });
   } catch (error) {
     console.error(error);
     return response.status(500).json({
