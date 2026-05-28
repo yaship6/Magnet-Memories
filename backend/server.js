@@ -81,6 +81,8 @@ app.use(
   })
 );
 
+app.use(express.json());
+
 app.options(/.*/, cors({
   origin(origin, callback) {
     callback(null, isAllowedOrigin(origin));
@@ -405,9 +407,10 @@ app.get("/api/config-check", (_request, response) => {
 
 app.post("/api/auth/signup", async (request, response) => {
   try {
-    const name = String(request.body.name ?? "").trim();
-    const gmail = String(request.body.gmail ?? "").trim().toLowerCase();
-    const password = String(request.body.password ?? "");
+    const body = request.body ?? {};
+    const name = String(body.name ?? "").trim();
+    const gmail = String(body.gmail ?? body.email ?? "").trim().toLowerCase();
+    const password = String(body.password ?? "");
 
     if (!name || !gmail || !password) {
       return response
@@ -461,8 +464,9 @@ app.post("/api/auth/signup", async (request, response) => {
 });
 
 app.post("/api/auth/login", async (request, response) => {
-  const gmail = String(request.body.email ?? "").trim().toLowerCase();
-  const password = String(request.body.password ?? "");
+  const body = request.body ?? {};
+  const gmail = String(body.email ?? body.gmail ?? "").trim().toLowerCase();
+  const password = String(body.password ?? "");
 
   if (!gmail || !password) {
     return response.status(400).json({ message: "Gmail and password are required." });
