@@ -26,6 +26,7 @@ function Cart() {
     (sum, item) => sum + getPriceNumber(item.price) * item.quantity,
     0
   );
+  const customerDisplayName = user?.name ?? user?.gmail ?? user?.email ?? "";
 
   const handlePlaceOrder = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -43,7 +44,7 @@ function Cart() {
 
     try {
       const orderResponse = await createOrder({
-        customer: { ...user, phone },
+        customer: { ...user, name: customerDisplayName, phone },
         deliveryAddress,
         notes,
         items: cartItems,
@@ -81,7 +82,7 @@ function Cart() {
               </h1>
               <p className="mt-4 text-xl text-gray-700">
                 {user
-                  ? `${user.name}'s saved cart`
+                  ? `${customerDisplayName}'s saved cart`
                   : "Login to save cart items for your account."}
               </p>
             </div>
@@ -226,7 +227,7 @@ function Cart() {
                       Name
                       <input
                         type="text"
-                        value={user.name}
+                        value={customerDisplayName}
                         readOnly
                         className="rounded-2xl border border-[#ffb6b6] bg-[#f8efe6] px-5 py-4 text-[#1a1a1a] outline-none"
                       />

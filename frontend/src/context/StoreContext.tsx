@@ -9,7 +9,7 @@ import {
 
 export type User = {
   id?: string;
-  name: string;
+  name?: string;
   email: string;
   gmail?: string;
 };
@@ -91,11 +91,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [cartItems, user]);
 
   const setAuthenticatedUser = (nextUser: User) => {
+    const email = String(nextUser.email ?? nextUser.gmail ?? "")
+      .trim()
+      .toLowerCase();
+
     const normalizedUser = {
       id: nextUser.id,
-      name: nextUser.name.trim(),
-      email: nextUser.email.trim().toLowerCase(),
-      gmail: (nextUser.gmail ?? nextUser.email).trim().toLowerCase(),
+      name: String(nextUser.name ?? email).trim(),
+      email,
+      gmail: String(nextUser.gmail ?? email).trim().toLowerCase(),
     };
 
     window.localStorage.setItem(currentUserKey, JSON.stringify(normalizedUser));

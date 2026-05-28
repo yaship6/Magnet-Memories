@@ -127,10 +127,11 @@ function verifyPassword(password, user) {
 
 function toPublicUser(user) {
   const gmail = user.gmail ?? user.email;
+  const name = user.name ?? user.gmail ?? user.email ?? "Customer";
 
   return {
     id: user.id,
-    name: user.name,
+    name,
     email: gmail,
     gmail,
   };
@@ -255,7 +256,6 @@ async function createSupabaseCustomer(user) {
     prefer: "return=minimal",
     body: {
       id: user.id,
-      name: user.name,
       gmail: user.gmail,
       salt: user.salt,
       password_hash: user.password_hash,

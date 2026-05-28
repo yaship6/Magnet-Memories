@@ -56,8 +56,8 @@ function Navbar() {
               type="button"
               onClick={logout}
               className={`${navLinkClass} w-12 px-0`}
-              aria-label={`Logout ${user.name}`}
-              title={`Logout ${user.name}`}
+              aria-label={`Logout ${user.name ?? user.gmail ?? user.email}`}
+              title={`Logout ${user.name ?? user.gmail ?? user.email}`}
             >
               <LogOut size={22} />
             </button>
