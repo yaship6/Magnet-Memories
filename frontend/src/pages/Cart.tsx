@@ -60,6 +60,7 @@ function Cart() {
       setOrderMessage(
         `Order placed successfully. Order ID: ${order.id.slice(0, 8)}`
       );
+      window.scrollTo(0, 0);
     } catch {
       setOrderError("Could not place order. Please check details and try again.");
     } finally {
@@ -296,7 +297,7 @@ function Cart() {
                   </p>
                 </div>
                 <span className="rounded-full bg-[#2f9f9a] px-5 py-2 text-base font-bold text-white">
-                  {placedOrder.status}
+                  {placedOrder.status || "pending"}
                 </span>
               </div>
 

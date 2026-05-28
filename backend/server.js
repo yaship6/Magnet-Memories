@@ -423,7 +423,6 @@ app.post("/api/orders", async (request, response) => {
       notes,
       items,
       total_amount: totalAmount,
-      status: "new",
     });
 
     let emailSent = false;

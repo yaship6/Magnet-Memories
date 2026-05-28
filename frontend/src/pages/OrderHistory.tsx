@@ -86,7 +86,7 @@ function OrderHistory() {
                       </p>
                     </div>
                     <span className="rounded-full bg-[#2f9f9a] px-5 py-2 text-base font-bold text-white">
-                      {order.status}
+                      {order.status || "pending"}
                     </span>
                   </div>
 
@@ -104,6 +104,77 @@ function OrderHistory() {
                         </span>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mt-6 rounded-2xl bg-[#f0f0f0] p-5">
+                    <h3 className="text-lg font-black text-[#790405]">
+                      Tracking Status
+                    </h3>
+                    <div className="mt-4 space-y-3">
+                      {[
+                        { status: "pending", label: "Order Confirmed", icon: "✓" },
+                        {
+                          status: "confirmed",
+                          label: "Payment Verified",
+                          icon: "✓",
+                        },
+                        {
+                          status: "processing",
+                          label: "Processing",
+                          icon: "⊙",
+                        },
+                        { status: "shipped", label: "Shipped", icon: "📦" },
+                        {
+                          status: "delivered",
+                          label: "Delivered",
+                          icon: "🎉",
+                        },
+                      ].map((step, index) => {
+                        const statuses = [
+                          "pending",
+                          "confirmed",
+                          "processing",
+                          "shipped",
+                          "delivered",
+                        ];
+                        const currentStatusIndex = statuses.indexOf(
+                          order.status || "pending"
+                        );
+                        const stepIndex = index;
+                        const isCompleted = stepIndex <= currentStatusIndex;
+                        const isCurrent = stepIndex === currentStatusIndex;
+
+                        return (
+                          <div
+                            key={step.status}
+                            className="flex items-center gap-3"
+                          >
+                            <div
+                              className={`flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold ${
+                                isCompleted
+                                  ? "bg-[#2f9f9a] text-white"
+                                  : "bg-[#e0e0e0] text-gray-400"
+                              }`}
+                            >
+                              {step.icon}
+                            </div>
+                            <div className="flex-1">
+                              <p
+                                className={`text-sm font-bold ${
+                                  isCurrent
+                                    ? "text-[#ce272a]"
+                                    : isCompleted
+                                      ? "text-[#2f9f9a]"
+                                      : "text-gray-400"
+                                }`}
+                              >
+                                {step.label}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <div className="mt-5 flex flex-wrap justify-between gap-4 border-t border-[#ffb6b6] pt-5">
