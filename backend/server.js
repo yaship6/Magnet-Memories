@@ -213,7 +213,13 @@ async function createSupabaseOrder(order) {
     body: order,
   });
 
-  return orders[0];
+  const createdOrder = Array.isArray(orders) ? orders[0] : orders;
+
+  if (!createdOrder) {
+    throw new Error("Supabase did not return the created order.");
+  }
+
+  return createdOrder;
 }
 
 async function createSupabaseFeedback(feedback) {
@@ -223,7 +229,15 @@ async function createSupabaseFeedback(feedback) {
     body: feedback,
   });
 
-  return feedbackRows[0];
+  const createdFeedback = Array.isArray(feedbackRows)
+    ? feedbackRows[0]
+    : feedbackRows;
+
+  if (!createdFeedback) {
+    throw new Error("Supabase did not return the created feedback.");
+  }
+
+  return createdFeedback;
 }
 
 async function listSupabaseOrdersByGmail(gmail) {
@@ -235,9 +249,9 @@ async function listSupabaseOrdersByGmail(gmail) {
 }
 
 async function createSupabaseCustomer(user) {
-  const customers = await requestSupabaseTable("customers", {
+  await requestSupabaseTable("customers", {
     method: "POST",
-    prefer: "return=representation",
+    prefer: "return=minimal",
     body: {
       id: user.id,
       name: user.name,
@@ -248,13 +262,17 @@ async function createSupabaseCustomer(user) {
     },
   });
 
-  return customers[0];
+  return user;
 }
 
 async function findSupabaseCustomerByGmail(gmail) {
   const customers = await requestSupabaseTable("customers", {
     query: `gmail=eq.${encodeURIComponent(gmail)}&select=*`,
   });
+
+  if (!Array.isArray(customers)) {
+    return customers ?? null;
+  }
 
   return customers[0] ?? null;
 }
