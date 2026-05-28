@@ -56,12 +56,14 @@ app.use(
     origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
   })
 );
 
-app.options("*", cors());
-app.use(express.json({ limit: "10mb" }));
+app.options(/.*/, cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 function createPasswordHash(password, salt = crypto.randomBytes(16).toString("hex")) {
   const hash = crypto
