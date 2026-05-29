@@ -14,6 +14,7 @@ import Chatbot from "./components/Chatbot";
 import ReturnsExchanges from "./pages/ReturnsExchanges";
 import OrderHistory from "./pages/OrderHistory";
 import Wishlist from "./pages/Wishlist";
+import ProfileEdit from "./pages/ProfileEdit";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/profile-edit" element={<ProfileEdit />} />
         <Route path="/orders" element={<OrderHistory />} />
         <Route path="/order-feedback" element={<OrderFeedback />} />
         <Route path="/society-stalls" element={<SocietyStalls />} />

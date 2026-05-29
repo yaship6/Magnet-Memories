@@ -110,68 +110,9 @@ function OrderFeedback() {
             />
           </div>
 
-          <section className="mt-10 rounded-[32px] border border-[#ce272a]/25 bg-[#ffbcbc] p-5 shadow-xl sm:p-8">
-            <div className="flex flex-wrap items-center justify-between gap-6">
-              <h2 className="text-2xl font-black text-[#ce272a] sm:text-3xl">
-                Happy Customer Reviews
-              </h2>
-
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={showPreviousReview}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2f9f9a]/40 bg-white text-[#2f9f9a]"
-                  aria-label="Previous review"
-                >
-                  <ChevronLeft size={22} />
-                </button>
-                <button
-                  type="button"
-                  onClick={showNextReview}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2f9f9a]/40 bg-white text-[#2f9f9a]"
-                  aria-label="Next review"
-                >
-                  <ChevronRight size={22} />
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 items-center gap-8 md:grid-cols-[0.8fr_1.2fr]">
-              <img
-                src={review.image}
-                alt="Customer feedback for Memory Magnets"
-                className="h-72 w-full rounded-[24px] object-cover"
-              />
-
-              <div>
-                <p className="text-2xl font-black text-[#2f9f9a]">
-                  "{review.title}"
-                </p>
-                <p className="mt-4 text-lg leading-relaxed text-gray-700">
-                  {review.text}
-                </p>
-                <div className="mt-6 flex gap-2">
-                  {reviews.map((item, index) => (
-                    <button
-                      key={item.title}
-                      type="button"
-                      onClick={() => setActiveReview(index)}
-                      className={`h-2.5 rounded-full transition ${
-                        activeReview === index
-                          ? "w-8 bg-[#ce272a]"
-                          : "w-2.5 bg-[#2f9f9a]/35"
-                      }`}
-                      aria-label={`Show review ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-
           <form
             onSubmit={handleSubmitFeedback}
-            className="mt-8 grid gap-6 rounded-[32px] border border-[#ce272a]/25 bg-[#ffbcbc] p-5 shadow-xl sm:p-10"
+            className="mt-10 grid gap-6 rounded-[32px] border border-[#ce272a]/25 bg-[#ffbcbc] p-5 shadow-xl sm:p-10"
           >
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <label className="flex flex-col gap-2 text-lg font-semibold">
@@ -246,6 +187,65 @@ function OrderFeedback() {
               {isSubmitting ? "Submitting..." : "Submit Feedback"}
             </button>
           </form>
+
+          <section className="mt-8 rounded-[32px] border border-[#ce272a]/25 bg-[#ffbcbc] p-5 shadow-xl sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-6">
+              <h2 className="text-2xl font-black text-[#ce272a] sm:text-3xl">
+                Happy Customer Reviews
+              </h2>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={showPreviousReview}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2f9f9a]/40 bg-white text-[#2f9f9a]"
+                  aria-label="Previous review"
+                >
+                  <ChevronLeft size={22} />
+                </button>
+                <button
+                  type="button"
+                  onClick={showNextReview}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2f9f9a]/40 bg-white text-[#2f9f9a]"
+                  aria-label="Next review"
+                >
+                  <ChevronRight size={22} />
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 items-center gap-8 md:grid-cols-[0.8fr_1.2fr]">
+              <img
+                src={review.image}
+                alt="Customer feedback for Memory Magnets"
+                className="h-72 w-full rounded-[24px] object-cover"
+              />
+
+              <div>
+                <p className="text-2xl font-black text-[#2f9f9a]">
+                  "{review.title}"
+                </p>
+                <p className="mt-4 text-lg leading-relaxed text-gray-700">
+                  {review.text}
+                </p>
+                <div className="mt-6 flex gap-2">
+                  {reviews.map((item, index) => (
+                    <button
+                      key={item.title}
+                      type="button"
+                      onClick={() => setActiveReview(index)}
+                      className={`h-2.5 rounded-full transition ${
+                        activeReview === index
+                          ? "w-8 bg-[#ce272a]"
+                          : "w-2.5 bg-[#2f9f9a]/35"
+                      }`}
+                      aria-label={`Show review ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
         </section>
       </main>
 

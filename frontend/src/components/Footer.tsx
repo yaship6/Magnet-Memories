@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import logoImage from "../../Untitled (Your Story).png";
 
@@ -63,7 +63,14 @@ function Footer() {
             >
               <FaInstagram />
             </a>
-            <FaLinkedin />
+            <a
+              href="https://wa.me/917042736597?text=Hi%20The%20Memory%20Magnets%2C%20I%20want%20to%20ask%20about%20an%20order."
+              target="_blank"
+              rel="noreferrer"
+              aria-label="The Memory Magnets on WhatsApp"
+            >
+              <FaWhatsapp />
+            </a>
           </div>
         </div>
 

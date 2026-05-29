@@ -1,4 +1,5 @@
 import { Bookmark, ShoppingCart } from "lucide-react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
@@ -318,6 +319,7 @@ function Shop() {
     user,
   } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [addedProductId, setAddedProductId] = useState("");
   const requestedCategory = searchParams.get("category") ?? "All";
   const activeCategory = categories.some(
     (category) => category.value === requestedCategory
@@ -354,6 +356,13 @@ function Shop() {
     }
 
     addToCart(getStoreItem(product));
+    const productId = getProductId(product);
+    setAddedProductId(productId);
+    window.setTimeout(() => {
+      setAddedProductId((currentProductId) =>
+        currentProductId === productId ? "" : currentProductId
+      );
+    }, 1400);
   };
 
   const handleToggleWishlist = (product: Product) => {
@@ -481,9 +490,9 @@ function Shop() {
     <div className="min-h-screen bg-[#f8efe6] text-[#1a1a1a]">
       <Navbar />
 
-      <main className="min-h-[105vh] px-3 py-10">
+      <main className="min-h-[105vh] px-8 py-10">
         <section className="mx-auto max-w-[1800px]">
-          <div className="sticky top-0 z-10 -mx-3 mb-7 flex flex-wrap items-center justify-center gap-3 bg-[#f8efe6] px-5 py-4 text-base font-semibold text-black lg:gap-5 lg:text-lg">
+          <div className="sticky top-0 z-10 -mx-8 mb-7 flex flex-wrap items-center justify-center gap-3 bg-[#f8efe6] px-8 py-4 text-base font-semibold text-black lg:gap-5 lg:text-lg">
             {categories.map((category) => (
               <button
                 key={category.value}
@@ -510,6 +519,7 @@ function Shop() {
             {visiblePins.map((product, index) => {
               const productId = getProductId(product);
               const saved = isInWishlist(productId);
+              const isAdded = addedProductId === productId;
 
               return (
               <article
@@ -526,7 +536,7 @@ function Shop() {
                   <button
                     type="button"
                     onClick={() => handleToggleWishlist(product)}
-                    className={`absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full shadow-lg transition group-hover:opacity-100 ${
+                    className={`absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full shadow-lg transition group-hover:opacity-100 ${
                       saved
                         ? "bg-[#e60023] text-white opacity-100"
                         : "bg-white text-[#790405] opacity-0"
@@ -548,6 +558,11 @@ function Shop() {
                   >
                     <ShoppingCart size={18} />
                   </button>
+                  {isAdded && (
+                    <div className="pointer-events-none absolute bottom-14 right-3 rounded-full border-2 border-[#790405] bg-[#2f9f9a] px-4 py-2 text-sm font-black text-white shadow-xl">
+                      Added!
+                    </div>
+                  )}
                 </div>
 
                 <div className="px-1 pt-2">

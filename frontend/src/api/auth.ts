@@ -30,3 +30,14 @@ export async function loginUser(payload: { email: string; password: string }) {
   const response = await api.post<AuthResponse>("/auth/login", payload);
   return getUserFromResponse(response.data);
 }
+
+export async function updateProfile(payload: {
+  id?: string;
+  currentEmail: string;
+  name: string;
+  phone: string;
+  email: string;
+}) {
+  const response = await api.put<AuthResponse>("/auth/profile", payload);
+  return getUserFromResponse(response.data);
+}

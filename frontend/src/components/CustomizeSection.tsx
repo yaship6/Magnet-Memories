@@ -360,7 +360,9 @@ function CustomizeSection() {
       return;
     }
 
-    const itemId = `custom-${magnetType}-${previewImages.join("-")}`;
+    const itemId = `custom-${magnetType}-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
 
     for (let count = 0; count < quantity; count += 1) {
       addToCart({

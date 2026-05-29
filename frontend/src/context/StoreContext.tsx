@@ -11,6 +11,7 @@ export type User = {
   name?: string;
   email: string;
   gmail?: string;
+  phone?: string;
 };
 
 export type CartItem = {
@@ -31,6 +32,7 @@ type StoreContextValue = {
   wishlistItems: WishlistItem[];
   wishlistCount: number;
   setAuthenticatedUser: (user: User) => void;
+  updateAuthenticatedUser: (user: User) => void;
   logout: () => void;
   addToCart: (item: Omit<CartItem, "quantity">) => void;
   removeFromCart: (id: string) => void;
@@ -140,12 +142,43 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       name: String(nextUser.name ?? email).trim(),
       email,
       gmail: String(nextUser.gmail ?? email).trim().toLowerCase(),
+      phone: String(nextUser.phone ?? "").trim(),
     };
 
     window.localStorage.setItem(currentUserKey, JSON.stringify(normalizedUser));
     setUser(normalizedUser);
     setCartItems(readStoredCart(normalizedUser));
     setWishlistItems(readStoredWishlist(normalizedUser));
+  };
+
+  const updateAuthenticatedUser = (nextUser: User) => {
+    const email = String(nextUser.email ?? nextUser.gmail ?? "")
+      .trim()
+      .toLowerCase();
+
+    const normalizedUser = {
+      id: nextUser.id,
+      name: String(nextUser.name ?? email).trim(),
+      email,
+      gmail: String(nextUser.gmail ?? email).trim().toLowerCase(),
+      phone: String(nextUser.phone ?? "").trim(),
+    };
+
+    if (user?.email && user.email !== normalizedUser.email) {
+      window.localStorage.removeItem(getCartKey(user.email));
+      window.localStorage.removeItem(getWishlistKey(user.email));
+    }
+
+    window.localStorage.setItem(currentUserKey, JSON.stringify(normalizedUser));
+    window.localStorage.setItem(
+      getCartKey(normalizedUser.email),
+      JSON.stringify(cartItems)
+    );
+    window.localStorage.setItem(
+      getWishlistKey(normalizedUser.email),
+      JSON.stringify(wishlistItems)
+    );
+    setUser(normalizedUser);
   };
 
   const logout = () => {
@@ -226,6 +259,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     wishlistItems,
     wishlistCount: wishlistItems.length,
     setAuthenticatedUser,
+    updateAuthenticatedUser,
     logout,
     addToCart,
     removeFromCart,

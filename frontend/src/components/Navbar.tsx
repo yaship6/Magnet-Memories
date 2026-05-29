@@ -19,7 +19,7 @@ function Navbar() {
     "flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-base font-semibold text-[#790405] transition hover:bg-[#ffbcbc]";
 
   return (
-    <nav className="relative z-20 grid min-h-20 min-w-[1440px] grid-cols-[280px_1fr_280px] items-center gap-8 bg-[#2f9f9a] px-8 py-3">
+    <nav className="relative z-20 grid min-h-20 min-w-[1440px] grid-cols-[280px_1fr_auto] items-center gap-8 bg-[#2f9f9a] px-8 py-3">
       <img
         src={logoImage}
         alt="The Memory Magnets"
@@ -48,6 +48,15 @@ function Navbar() {
         <Link to="/contact" className={navLinkClass}>
           Contact
         </Link>
+        <Link to="/cart" className={`${navLinkClass} gap-2`}>
+          <ShoppingCart size={19} />
+          <span>Cart</span>
+          {cartCount > 0 && (
+            <span className="rounded-full bg-[#2f9f9a] px-2 py-0.5 text-sm text-white">
+              {cartCount}
+            </span>
+          )}
+        </Link>
         {user ? (
           <div className="group relative">
             <button
@@ -68,6 +77,14 @@ function Navbar() {
               role="menu"
             >
               <Link
+                to="/profile-edit"
+                className={accountMenuItemClass}
+                role="menuitem"
+              >
+                <UserRound size={20} />
+                Profile Edit
+              </Link>
+              <Link
                 to="/wishlist"
                 className={accountMenuItemClass}
                 role="menuitem"
@@ -77,15 +94,6 @@ function Navbar() {
                 {wishlistCount > 0 && (
                   <span className="rounded-full bg-[#2f9f9a] px-2 py-0.5 text-sm text-white">
                     {wishlistCount}
-                  </span>
-                )}
-              </Link>
-              <Link to="/cart" className={accountMenuItemClass} role="menuitem">
-                <ShoppingCart size={20} />
-                <span className="flex-1">Cart</span>
-                {cartCount > 0 && (
-                  <span className="rounded-full bg-[#2f9f9a] px-2 py-0.5 text-sm text-white">
-                    {cartCount}
                   </span>
                 )}
               </Link>

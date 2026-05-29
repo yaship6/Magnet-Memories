@@ -4,13 +4,22 @@
 
 html {
   font-size: 18px;
+  min-width: 1440px;
 }
 
 body {
+  width: max(1440px, 100vw);
+  min-width: 1440px;
+  overflow-x: auto;
   font-family: 'Baloo 2', cursive;
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M8 4h6v14a2 2 0 0 0 4 0V4h6v14a8 8 0 0 1-16 0V4z' fill='%23ca3a3c' stroke='%23790405' stroke-width='2'/%3E%3Cpath d='M8 4h6v6H8zM18 4h6v6h-6z' fill='%23f8efe6' stroke='%23790405' stroke-width='2'/%3E%3C/svg%3E")
       16 16,
     auto;
+}
+
+#root {
+  width: max(1440px, 100vw);
+  min-width: 1440px;
 }
 
 a,

@@ -81,7 +81,7 @@ app.use(
   })
 );
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
 app.options(/.*/, cors({
   origin(origin, callback) {
@@ -136,6 +136,7 @@ function toPublicUser(user) {
     name,
     email: gmail,
     gmail,
+    phone: user.phone ?? "",
   };
 }
 
@@ -244,6 +245,24 @@ async function createSupabaseFeedback(feedback) {
   return createdFeedback;
 }
 
+async function createSupabaseContactMessage(message) {
+  const contactRows = await requestSupabaseTable("contact_messages", {
+    method: "POST",
+    prefer: "return=representation",
+    body: message,
+  });
+
+  const createdMessage = Array.isArray(contactRows)
+    ? contactRows[0]
+    : contactRows;
+
+  if (!createdMessage) {
+    throw new Error("Supabase did not return the created contact message.");
+  }
+
+  return createdMessage;
+}
+
 async function listSupabaseOrdersByGmail(gmail) {
   return requestSupabaseTable("orders", {
     query: `customer_gmail=eq.${encodeURIComponent(
@@ -258,6 +277,7 @@ async function createSupabaseCustomer(user) {
     prefer: "return=minimal",
     body: {
       id: user.id,
+      name: user.name,
       gmail: user.gmail,
       salt: user.salt,
       password_hash: user.password_hash,
@@ -278,6 +298,23 @@ async function findSupabaseCustomerByGmail(gmail) {
   }
 
   return customers[0] ?? null;
+}
+
+async function updateSupabaseCustomerProfile(id, profile) {
+  const customers = await requestSupabaseTable("customers", {
+    method: "PATCH",
+    query: `id=eq.${encodeURIComponent(id)}&select=*`,
+    prefer: "return=representation",
+    body: profile,
+  });
+
+  const updatedCustomer = Array.isArray(customers) ? customers[0] : customers;
+
+  if (!updatedCustomer) {
+    throw new Error("Customer profile was not updated.");
+  }
+
+  return updatedCustomer;
 }
 
 function encodeBase64(value) {
@@ -317,8 +354,8 @@ function formatOrderEmail(order) {
 }
 
 async function sendGmailMessage({ to, subject, text }) {
-  const gmailUser = process.env.GMAIL_USER;
-  const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+  const gmailUser = process.env.GMAIL_USER?.trim();
+  const gmailAppPassword = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, "");
 
   if (!gmailUser || !gmailAppPassword) {
     return { skipped: true };
@@ -437,6 +474,7 @@ app.post("/api/auth/signup", async (request, response) => {
       id: createId(),
       name,
       gmail,
+      phone: "",
       salt,
       password_hash: hash,
       createdAt: new Date().toISOString(),
@@ -450,6 +488,7 @@ app.post("/api/auth/signup", async (request, response) => {
         name,
         email: gmail,
         gmail,
+        phone: "",
       },
     });
   } catch (error) {
@@ -489,6 +528,55 @@ app.post("/api/auth/login", async (request, response) => {
   }
 
   return response.json({ user: toPublicUser(user) });
+});
+
+app.put("/api/auth/profile", async (request, response) => {
+  try {
+    const body = request.body ?? {};
+    const id = String(body.id ?? "").trim();
+    const currentGmail = String(body.currentGmail ?? body.currentEmail ?? "")
+      .trim()
+      .toLowerCase();
+    const name = String(body.name ?? "").trim();
+    const gmail = String(body.gmail ?? body.email ?? "").trim().toLowerCase();
+    const phone = String(body.phone ?? "").trim();
+
+    if (!id || !currentGmail || !name || !gmail || !phone) {
+      return response.status(400).json({
+        message: "Name, phone number, and email are required.",
+      });
+    }
+
+    const currentUser = await findSupabaseCustomerByGmail(currentGmail);
+
+    if (!currentUser || currentUser.id !== id) {
+      return response.status(404).json({ message: "Profile was not found." });
+    }
+
+    if (gmail !== currentGmail) {
+      const existingUser = await findSupabaseCustomerByGmail(gmail);
+
+      if (existingUser && existingUser.id !== id) {
+        return response
+          .status(409)
+          .json({ message: "An account with this email already exists." });
+      }
+    }
+
+    const updatedUser = await updateSupabaseCustomerProfile(id, {
+      name,
+      gmail,
+      phone,
+    });
+
+    return response.json({ user: toPublicUser(updatedUser) });
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({
+      message:
+        error instanceof Error ? error.message : "Could not update profile.",
+    });
+  }
 });
 
 app.post("/api/orders", async (request, response) => {
@@ -599,6 +687,39 @@ app.post("/api/feedback", async (request, response) => {
     return response.status(500).json({
       message:
         error instanceof Error ? error.message : "Could not submit feedback.",
+    });
+  }
+});
+
+app.post("/api/contact-messages", async (request, response) => {
+  const body = request.body ?? {};
+  const name = String(body.name ?? "").trim();
+  const phone = String(body.phone ?? "").trim();
+  const requestType = String(body.requestType ?? "").trim();
+  const messageText = String(body.message ?? "").trim();
+
+  if (!name || !phone || !requestType || !messageText) {
+    return response.status(400).json({
+      message: "Name, phone number, request type, and message are required.",
+    });
+  }
+
+  try {
+    const contactMessage = await createSupabaseContactMessage({
+      customer_name: name,
+      customer_phone: phone,
+      request_type: requestType,
+      message: messageText,
+    });
+
+    return response.status(201).json({ contactMessage });
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({
+      message:
+        error instanceof Error
+          ? error.message
+          : "Could not submit contact message.",
     });
   }
 });
