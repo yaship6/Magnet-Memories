@@ -4,9 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
-import dns from "node:dns";
-import nodemailer from "nodemailer";
-dns.setDefaultResultOrder("ipv4first");
+import { google } from "googleapis";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envFile = path.join(__dirname, ".env");
@@ -676,38 +674,43 @@ function formatOrderEmail(order) {
     .join("\n");
 }
 
+function formatEmailHeader(value) {
+  return String(value).replace(/[\r\n]+/g, " ").trim();
+}
+
 async function sendGmailMessage({ to, subject, text }) {
   const gmailUser = (process.env.EMAIL_USER ?? process.env.GMAIL_USER)?.trim();
-  const gmailAppPassword = (
-    process.env.EMAIL_PASS ?? process.env.GMAIL_APP_PASSWORD
-  )?.replace(/\s+/g, "");
+  const clientId = process.env.GMAIL_CLIENT_ID?.trim();
+  const clientSecret = process.env.GMAIL_CLIENT_SECRET?.trim();
+  const refreshToken = process.env.GMAIL_REFRESH_TOKEN?.trim();
 
-  if (!gmailUser || !gmailAppPassword) {
+  if (!gmailUser || !clientId || !clientSecret || !refreshToken) {
     return { skipped: true };
   }
-console.log("GMAIL_USER:", process.env.GMAIL_USER);
-console.log("GMAIL_APP_PASSWORD exists:", !!process.env.GMAIL_APP_PASSWORD);
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-   family: 4,
-  auth: {
-    user: gmailUser,
-    pass: gmailAppPassword,
-  },
-});
+  const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
+  oauth2Client.setCredentials({ refresh_token: refreshToken });
 
-console.log("Verifying SMTP connection...");
-await transporter.verify();
-console.log("SMTP connection verified");
-await transporter.sendMail({
-  from: `"The Memory Magnets" <${gmailUser}>`,
-  to,
-  subject,
-  text,
-});
+  const gmail = google.gmail({ version: "v1", auth: oauth2Client });
+  const raw = Buffer.from(
+    [
+      `From: "The Memory Magnets" <${gmailUser}>`,
+      `To: ${formatEmailHeader(to)}`,
+      `Subject: ${formatEmailHeader(subject)}`,
+      "Content-Type: text/plain; charset=utf-8",
+      "",
+      text,
+    ].join("\r\n")
+  )
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  await gmail.users.messages.send({
+    userId: "me",
+    requestBody: { raw },
+  });
 
   return { skipped: false };
 }
@@ -715,7 +718,9 @@ await transporter.sendMail({
 async function sendOrderConfirmationEmail(order, to) {
   const emailConfigured = Boolean(
     (process.env.EMAIL_USER ?? process.env.GMAIL_USER)?.trim() &&
-      (process.env.EMAIL_PASS ?? process.env.GMAIL_APP_PASSWORD)?.trim()
+      process.env.GMAIL_CLIENT_ID?.trim() &&
+      process.env.GMAIL_CLIENT_SECRET?.trim() &&
+      process.env.GMAIL_REFRESH_TOKEN?.trim()
   );
 
   if (!emailConfigured) {
