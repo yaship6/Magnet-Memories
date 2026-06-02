@@ -82,9 +82,9 @@ function Cart() {
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [notes, setNotes] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "phonepe">(
-    "razorpay"
-  );
+  const [paymentMethod, setPaymentMethod] = useState<
+    "razorpay" | "manual_upi"
+  >("razorpay");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isPaymentVerified, setIsPaymentVerified] = useState(false);
   const [orderMessage, setOrderMessage] = useState("");
@@ -100,7 +100,7 @@ function Cart() {
   const customerDisplayName = user?.name ?? user?.gmail ?? user?.email ?? "";
 
   const savePaidOrder = async (payment: {
-    method: "razorpay" | "phonepe";
+    method: "razorpay" | "manual_upi";
     razorpayOrderId?: string;
     razorpayPaymentId?: string;
     razorpaySignature?: string;
@@ -129,7 +129,7 @@ function Cart() {
       setOrderMessage(
         payment.method === "razorpay"
           ? `Payment verified and order placed. Order ID: ${order.id.slice(0, 8)}`
-          : `PhonePe/UPI payment noted and order placed. Order ID: ${order.id.slice(0, 8)}`
+          : `Manual UPI payment noted and order placed. Order ID: ${order.id.slice(0, 8)}`
       );
       window.scrollTo(0, 0);
   };
@@ -150,9 +150,9 @@ function Cart() {
     setConfirmationEmailMessage("");
 
     try {
-      if (paymentMethod === "phonepe") {
+      if (paymentMethod === "manual_upi") {
         await savePaidOrder({
-          method: "phonepe",
+          method: "manual_upi",
         });
         return;
       }
@@ -364,15 +364,15 @@ function Cart() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod("phonepe")}
+                      onClick={() => setPaymentMethod("manual_upi")}
                       className={`rounded-2xl border-2 px-5 py-4 text-left transition ${
-                        paymentMethod === "phonepe"
+                        paymentMethod === "manual_upi"
                           ? "border-[#790405] bg-[#ca3a3c] text-white"
                           : "border-[#ffb6b6] bg-[#f8efe6] text-[#790405]"
                       }`}
                     >
                       <span className="block text-lg font-black">
-                        PhonePe / UPI
+                        Manual UPI
                       </span>
                       <span className="mt-1 block text-sm font-semibold">
                         Scan QR and place your order
@@ -395,12 +395,12 @@ function Cart() {
                     <div className="mt-5 grid gap-5 sm:grid-cols-[180px_1fr] sm:items-center">
                       <img
                         src={paymentQr}
-                        alt="PhonePe UPI payment QR code"
+                        alt="Manual UPI payment QR code"
                         className="mx-auto h-44 w-44 rounded-2xl border border-[#ffb6b6] bg-white object-contain p-3 sm:mx-0"
                       />
                       <div>
                         <p className="text-base text-gray-700 sm:text-lg">
-                          Pay Rs. {total} using PhonePe/UPI, then place your
+                          Pay Rs. {total} using any UPI app, then place your
                           order.
                         </p>
                         <p className="mt-3 break-all text-xl font-black text-[#790405]">
@@ -483,7 +483,7 @@ function Cart() {
                         : "Placing Order..."
                       : paymentMethod === "razorpay"
                       ? `Pay Rs. ${total} & Place Order`
-                      : "Place Order with PhonePe"}
+                      : "Place Order with Manual UPI"}
                   </button>
 
                   {orderMessage && (
@@ -566,7 +566,7 @@ function Cart() {
                   <p className="mt-2 text-lg text-gray-700">
                     {isPaymentVerified
                       ? "Razorpay payment was verified before saving this order."
-                      : "PhonePe/UPI payment details are attached to this order."}
+                      : "Manual UPI payment details are attached to this order."}
                   </p>
                   <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-base font-black text-[#2f9f9a]">
                     <ShieldCheck size={18} />

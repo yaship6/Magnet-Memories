@@ -24,10 +24,9 @@ export type Order = {
   >;
   total_amount: number;
   status: string;
-  payment_method?: "razorpay" | "phonepe" | string | null;
+  payment_method?: "razorpay" | "manual_upi" | string | null;
   razorpay_order_id?: string | null;
   razorpay_payment_id?: string | null;
-  phonepe_transaction_id?: string | null;
   payment_verified_at?: string | null;
   order_confirmed_at?: string | null;
   confirmation_email_sent?: boolean;
@@ -67,11 +66,10 @@ export async function createOrder(payload: {
   notes: string;
   items: CartItem[];
   payment?: {
-    method?: "razorpay" | "phonepe";
+    method?: "razorpay" | "manual_upi";
     razorpayOrderId?: string;
     razorpayPaymentId?: string;
     razorpaySignature?: string;
-    phonepeTransactionId?: string;
   };
 }) {
   try {
