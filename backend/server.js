@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
 import dns from "node:dns";
-dns.setDefaultResultOrder("ipv4first");
 import nodemailer from "nodemailer";
+dns.setDefaultResultOrder("ipv4first");
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envFile = path.join(__dirname, ".env");
@@ -686,10 +686,6 @@ async function sendGmailMessage({ to, subject, text }) {
     return { skipped: true };
   }
 
-const nodemailer = require("nodemailer");
-const dns = require("dns");
-
-dns.setDefaultResultOrder("ipv4first");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -697,9 +693,6 @@ const transporter = nodemailer.createTransport({
     user: gmailUser,
     pass: gmailAppPassword,
   },
-  connectionTimeout: 60000,
-  greetingTimeout: 60000,
-  socketTimeout: 60000,
 });
 await transporter.sendMail({
   from: `"The Memory Magnets" <${gmailUser}>`,
