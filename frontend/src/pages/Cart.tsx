@@ -85,7 +85,6 @@ function Cart() {
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "phonepe">(
     "razorpay"
   );
-  const [phonepeTransactionId, setPhonepeTransactionId] = useState("");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isPaymentVerified, setIsPaymentVerified] = useState(false);
   const [orderMessage, setOrderMessage] = useState("");
@@ -105,7 +104,6 @@ function Cart() {
     razorpayOrderId?: string;
     razorpayPaymentId?: string;
     razorpaySignature?: string;
-    phonepeTransactionId?: string;
   }) => {
     if (!user) {
       throw new Error("Login is required to place your order.");
@@ -124,7 +122,6 @@ function Cart() {
       setPhone("");
       setDeliveryAddress("");
       setNotes("");
-      setPhonepeTransactionId("");
       setIsPaymentVerified(payment.method === "razorpay");
       setPlacedOrder(order);
       setConfirmationEmailSent(emailSent);
@@ -154,13 +151,8 @@ function Cart() {
 
     try {
       if (paymentMethod === "phonepe") {
-        if (!phonepeTransactionId.trim()) {
-          throw new Error("Enter your PhonePe/UPI transaction ID.");
-        }
-
         await savePaidOrder({
           method: "phonepe",
-          phonepeTransactionId: phonepeTransactionId.trim(),
         });
         return;
       }
@@ -383,7 +375,7 @@ function Cart() {
                         PhonePe / UPI
                       </span>
                       <span className="mt-1 block text-sm font-semibold">
-                        Scan QR and enter transaction ID
+                        Scan QR and place your order
                       </span>
                     </button>
                   </div>
@@ -408,8 +400,8 @@ function Cart() {
                       />
                       <div>
                         <p className="text-base text-gray-700 sm:text-lg">
-                          Pay Rs. {total} using PhonePe/UPI, then enter the
-                          transaction ID below before placing the order.
+                          Pay Rs. {total} using PhonePe/UPI, then place your
+                          order.
                         </p>
                         <p className="mt-3 break-all text-xl font-black text-[#790405]">
                           yashihihi@ibl
@@ -479,21 +471,6 @@ function Cart() {
                       className="resize-none rounded-2xl border border-[#ffb6b6] bg-white px-5 py-4 text-[#1a1a1a] outline-none focus:border-[#ce272a]"
                     />
                   </label>
-
-                  {paymentMethod === "phonepe" && (
-                    <label className="grid gap-2 text-lg font-semibold text-[#790405]">
-                      PhonePe / UPI Transaction ID
-                      <input
-                        value={phonepeTransactionId}
-                        onChange={(event) =>
-                          setPhonepeTransactionId(event.target.value)
-                        }
-                        required
-                        placeholder="Example: T1234567890"
-                        className="rounded-2xl border border-[#ffb6b6] bg-white px-5 py-4 text-[#1a1a1a] outline-none focus:border-[#ce272a]"
-                      />
-                    </label>
-                  )}
 
                   <button
                     type="submit"
