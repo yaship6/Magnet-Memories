@@ -368,11 +368,17 @@ function parseDataImageUrl(value) {
 }
 
 function getSupabaseConfig() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = process.env.SUPABASE_URL?.trim();
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
   if (!url || !key) {
     return null;
+  }
+
+  if (key.split(".").length !== 3) {
+    throw new Error(
+      "Supabase service role key is invalid. Check SUPABASE_SERVICE_ROLE_KEY in the backend environment."
+    );
   }
 
   return { url: url.replace(/\/$/, ""), key };
@@ -679,7 +685,10 @@ async function sendGmailMessage({ to, subject, text }) {
   }
 
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    requireTLS: true,
     connectionTimeout: 8000,
     greetingTimeout: 8000,
     socketTimeout: 8000,
