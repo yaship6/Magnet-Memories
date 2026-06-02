@@ -689,12 +689,18 @@ console.log("GMAIL_USER:", process.env.GMAIL_USER);
 console.log("GMAIL_APP_PASSWORD exists:", !!process.env.GMAIL_APP_PASSWORD);
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: gmailUser,
     pass: gmailAppPassword,
   },
 });
+
+console.log("Verifying SMTP connection...");
+await transporter.verify();
+console.log("SMTP connection verified");
 await transporter.sendMail({
   from: `"The Memory Magnets" <${gmailUser}>`,
   to,
