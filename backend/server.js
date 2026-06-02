@@ -4,6 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
+import dns from "node:dns";
+dns.setDefaultResultOrder("ipv4first");
 import nodemailer from "nodemailer";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -684,27 +686,27 @@ async function sendGmailMessage({ to, subject, text }) {
     return { skipped: true };
   }
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const nodemailer = require("nodemailer");
+const dns = require("dns");
 
-  await Promise.race([
-    transporter.sendMail({
-      from: `"The Memory Magnets" <${gmailUser}>`,
-      to,
-      subject,
-      text,
-    }),
-    new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("Gmail send timed out.")), 9000);
-    }),
-  ]);
+dns.setDefaultResultOrder("ipv4first");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: gmailUser,
+    pass: gmailAppPassword,
+  },
+  connectionTimeout: 60000,
+  greetingTimeout: 60000,
+  socketTimeout: 60000,
+});
+await transporter.sendMail({
+  from: `"The Memory Magnets" <${gmailUser}>`,
+  to,
+  subject,
+  text,
+});
 
   return { skipped: false };
 }
@@ -1268,6 +1270,20 @@ app.get("/api/orders/stream", async (request, response) => {
     closed = true;
     clearInterval(interval);
   });
+});
+app.get("/api/test-email", async (req, res) => {
+  try {
+    await sendGmailMessage({
+      to: "yourgmail@gmail.com",
+      subject: "Test",
+      text: "Email working",
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.listen(port, () => {
