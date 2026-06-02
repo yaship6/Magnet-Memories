@@ -685,8 +685,8 @@ async function sendGmailMessage({ to, subject, text }) {
   if (!gmailUser || !gmailAppPassword) {
     return { skipped: true };
   }
-console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+console.log("GMAIL_USER:", process.env.GMAIL_USER);
+console.log("GMAIL_APP_PASSWORD exists:", !!process.env.GMAIL_APP_PASSWORD);
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
