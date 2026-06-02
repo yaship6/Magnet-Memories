@@ -6,13 +6,13 @@ import motivationImage from "../../Motivation.webp";
 
 function Hero() {
   return (
-    <section className="grid min-h-[calc(112vh-96px)] grid-cols-1 items-center gap-12 px-5 py-20 sm:px-8 lg:min-h-[calc(118vh-96px)] lg:grid-cols-2 lg:px-16 lg:py-32">
-      <div>
+    <section className="mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:min-h-[calc(118vh-96px)] lg:grid-cols-2 lg:gap-12 lg:px-16 lg:py-32">
+      <div className="min-w-0">
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-5xl font-black leading-tight text-[#1a1a1a] sm:text-6xl lg:text-7xl"
+          className="text-4xl font-black leading-tight text-[#1a1a1a] min-[380px]:text-5xl sm:text-6xl lg:text-7xl"
         >
           Turn Your <br />
           Memories Into <br />
@@ -23,37 +23,37 @@ function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="mt-8 text-lg leading-relaxed text-[#470000] sm:text-xl"
+          className="mt-6 max-w-2xl text-base leading-relaxed text-[#470000] sm:mt-8 sm:text-xl"
         >
           Premium customized Square Photo Magnets, Big Acrylic Magnet Frames,
           and memory keepsakes delivered to your doorstep.
         </motion.p>
 
-        <div className="mt-10 flex flex-wrap gap-5">
+        <div className="mt-8 grid gap-3 min-[420px]:grid-cols-2 sm:mt-10 sm:flex sm:flex-wrap sm:gap-5">
           <Link
             to="/customize"
-            className="px-8 py-4 rounded-full border-2 border-[#790405] text-lg text-white bg-[#ca3a3c] hover:bg-[#5a0205] hover:border-[#ff9999] transition-all duration-300"
+            className="rounded-full border-2 border-[#790405] bg-[#ca3a3c] px-6 py-3 text-center text-base text-white transition-all duration-300 hover:border-[#ff9999] hover:bg-[#5a0205] sm:px-8 sm:py-4 sm:text-lg"
           >
             Customize Now
           </Link>
 
           <Link
             to="/shop"
-            className="px-8 py-4 rounded-full border-2 border-[#790405] text-lg text-white bg-[#ca3a3c] hover:bg-[#5a0205] hover:border-[#ff9999] transition-all duration-300"
+            className="rounded-full border-2 border-[#790405] bg-[#ca3a3c] px-6 py-3 text-center text-base text-white transition-all duration-300 hover:border-[#ff9999] hover:bg-[#5a0205] sm:px-8 sm:py-4 sm:text-lg"
           >
             Explore Collection
           </Link>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-6">
+      <div className="grid min-w-0 grid-cols-3 items-center justify-center gap-3 sm:flex sm:flex-wrap sm:gap-6">
         <motion.div
           animate={{ y: [0, -20, 0] }}
           transition={{
             repeat: Infinity,
             duration: 4,
           }}
-          className="h-60 w-40 overflow-hidden rounded-3xl shadow-2xl sm:h-72 sm:w-48"
+          className="h-40 w-full overflow-hidden rounded-2xl shadow-2xl min-[380px]:h-48 sm:h-72 sm:w-48 sm:rounded-3xl"
         >
           <img
             src={motivationImage}
@@ -68,7 +68,7 @@ function Hero() {
             repeat: Infinity,
             duration: 5,
           }}
-          className="h-60 w-40 overflow-hidden rounded-3xl shadow-2xl sm:h-72 sm:w-48"
+          className="h-40 w-full overflow-hidden rounded-2xl shadow-2xl min-[380px]:h-48 sm:h-72 sm:w-48 sm:rounded-3xl"
         >
           <img
             src={ekuImage}
@@ -84,7 +84,7 @@ function Hero() {
             duration: 4.6,
           }}
           whileHover={{ scale: 1.05 }}
-          className="h-60 w-40 overflow-hidden rounded-3xl shadow-2xl sm:h-72 sm:w-48"
+          className="h-40 w-full overflow-hidden rounded-2xl shadow-2xl min-[380px]:h-48 sm:h-72 sm:w-48 sm:rounded-3xl"
         >
           <img
             src={ganeshImage}

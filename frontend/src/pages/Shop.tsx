@@ -1,8 +1,9 @@
-import { Bookmark, ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { Bookmark, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import { getPexelsPhotos, type PexelsPhoto } from "../api/pexels";
 import { useStore } from "../context/StoreContext";
 
 type Product = {
@@ -14,6 +15,10 @@ type Product = {
   price: string;
   image: string | string[];
   quote?: string;
+  imageCredit?: {
+    photographer: string;
+    url: string;
+  };
 };
 
 const magnetImages = {
@@ -167,7 +172,7 @@ const products = [
   },
   {
     category: "Strip Acrylic Magnet Frames",
-    name: "Pinterest Mood Strip Acrylic Magnet Frame",
+    name: "Moodboard Strip Acrylic Magnet Frame",
     price: "Rs. 249",
     image: [
       magnetImages.pastelSky,
@@ -291,7 +296,97 @@ const products = [
   },
 ] satisfies Product[];
 
-const shopPins = products;
+const extraProductThemes = [
+  {
+    name: "Anniversary Memory",
+    image: magnetImages.beachCouple,
+    quote: "Always us",
+  },
+  {
+    name: "Best Friends",
+    image: magnetImages.partyFamily,
+    quote: "Forever favorite",
+  },
+  {
+    name: "Travel Diary",
+    image: magnetImages.mountainSunset,
+    quote: "Collect moments",
+  },
+  {
+    name: "Family Picnic",
+    image: magnetImages.familyPicnic,
+    quote: "Home is here",
+  },
+  {
+    name: "Birthday Glow",
+    image: magnetImages.berryCake,
+    quote: "Make a wish",
+  },
+  {
+    name: "Coffee Corner",
+    image: magnetImages.coffeeFlowers,
+    quote: "Warm memories",
+  },
+  {
+    name: "Baby Milestone",
+    image: magnetImages.babyCake,
+    quote: "Tiny joy",
+  },
+  {
+    name: "Pet Love",
+    image: magnetImages.fluffyDog,
+    quote: "Paws & love",
+  },
+  {
+    name: "Wedding Smile",
+    image: magnetImages.weddingSmile,
+    quote: "Our day",
+  },
+  {
+    name: "Flower Mood",
+    image: magnetImages.tulips,
+    quote: "Bloom softly",
+  },
+  {
+    name: "Beach Walk",
+    image: magnetImages.beachWalk,
+    quote: "Sea you soon",
+  },
+  {
+    name: "Celebration",
+    image: magnetImages.floralCake,
+    quote: "Good times",
+  },
+];
+
+const extraProducts = extraProductThemes.flatMap((theme, index) => {
+  const nextTheme = extraProductThemes[(index + 1) % extraProductThemes.length];
+  const thirdTheme = extraProductThemes[(index + 2) % extraProductThemes.length];
+
+  return [
+    {
+      category: "Square Photo Magnets",
+      name: `${theme.name} magnet`,
+      price: "Rs. 99",
+      image: theme.image,
+      quote: theme.quote,
+    },
+    {
+      category: "Big Acrylic Magnet Frames",
+      name: `${theme.name} Big Acrylic Magnet Frame`,
+      price: "Rs. 199",
+      image: theme.image,
+    },
+    {
+      category: "Strip Acrylic Magnet Frames",
+      name: `${theme.name} Strip Acrylic Magnet Frame`,
+      price: "Rs. 249",
+      image: [theme.image, nextTheme.image, thirdTheme.image],
+    },
+  ];
+}) satisfies Product[];
+
+const shopPins = [...products, ...extraProducts];
 
 const categories = [
   { label: "All", value: "All" },
@@ -309,6 +404,42 @@ const categories = [
 const getProductId = (product: Product) =>
   `${product.category}-${product.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
+const withPexelsImage = (
+  product: Product,
+  photos: PexelsPhoto[],
+  index: number
+): Product => {
+  if (photos.length === 0) {
+    return product;
+  }
+
+  if (product.category === "Strip Acrylic Magnet Frames") {
+    const photo = photos[index % photos.length];
+
+    return {
+      ...product,
+      image: [0, 1, 2].map(
+        (offset) => photos[(index + offset) % photos.length].image
+      ),
+      imageCredit: {
+        photographer: photo.photographer,
+        url: photo.pexelsUrl,
+      },
+    };
+  }
+
+  const photo = photos[index % photos.length];
+
+  return {
+    ...product,
+    image: photo.image,
+    imageCredit: {
+      photographer: photo.photographer,
+      url: photo.pexelsUrl,
+    },
+  };
+};
+
 function Shop() {
   const navigate = useNavigate();
   const {
@@ -318,6 +449,7 @@ function Shop() {
     removeFromWishlist,
     user,
   } = useStore();
+  const [pexelsPhotos, setPexelsPhotos] = useState<PexelsPhoto[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [addedProductId, setAddedProductId] = useState("");
   const requestedCategory = searchParams.get("category") ?? "All";
@@ -330,7 +462,30 @@ function Shop() {
     activeCategory === "All"
       ? shopPins
       : shopPins.filter((product) => product.category === activeCategory);
+  const visibleProducts = visiblePins.map((product, index) =>
+    withPexelsImage(product, pexelsPhotos, index)
+  );
   const isFilteredView = activeCategory !== "All";
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getPexelsPhotos()
+      .then((photos) => {
+        if (isMounted) {
+          setPexelsPhotos(photos);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setPexelsPhotos([]);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const updateCategory = (category: string) => {
     if (category === "All") {
@@ -349,7 +504,7 @@ function Shop() {
     image: Array.isArray(product.image) ? product.image[0] : product.image,
   });
 
-  const handleAddToCart = (product: (typeof shopPins)[number]) => {
+  const handleAddToCart = (product: Product) => {
     if (!user) {
       navigate("/login");
       return;
@@ -388,8 +543,8 @@ function Shop() {
         : [product.image, product.image, product.image];
 
       return (
-        <div className="flex h-[420px] items-center justify-center bg-[#f6f1ec] p-5">
-          <div className="relative aspect-[3/7] h-full max-h-[380px] rounded-[20px] bg-[#d8d5cb]/60 p-3 shadow-[0_18px_35px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.8)]">
+        <div className="flex h-[300px] items-center justify-center bg-[#f6f1ec] p-4 sm:h-[420px] sm:p-5">
+          <div className="relative aspect-[3/7] h-full max-h-[280px] rounded-[20px] bg-[#d8d5cb]/60 p-3 shadow-[0_18px_35px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.8)] sm:max-h-[380px]">
             {[0, 1, 2, 3].map((corner) => (
               <span
                 key={corner}
@@ -428,8 +583,8 @@ function Shop() {
       const image = Array.isArray(product.image) ? product.image[0] : product.image;
 
       return (
-        <div className="flex h-[420px] items-center justify-center bg-[#f6f1ec] p-5">
-          <div className="relative aspect-[3/4] h-full max-h-[380px] rounded-[22px] bg-[#e8e8e3]/65 p-4 shadow-[0_18px_36px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.85)]">
+        <div className="flex h-[300px] items-center justify-center bg-[#f6f1ec] p-4 sm:h-[420px] sm:p-5">
+          <div className="relative aspect-[3/4] h-full max-h-[280px] rounded-[22px] bg-[#e8e8e3]/65 p-4 shadow-[0_18px_36px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.85)] sm:max-h-[380px]">
             {[0, 1, 2, 3].map((corner) => (
               <span
                 key={corner}
@@ -460,8 +615,8 @@ function Shop() {
     const image = Array.isArray(product.image) ? product.image[0] : product.image;
 
     return (
-      <div className="flex aspect-square items-center justify-center bg-[#f6f1ec] p-5">
-        <div className="relative aspect-square w-full max-w-[330px] overflow-hidden rounded-[34px] bg-[#f1f1f1] shadow-[0_18px_34px_rgba(0,0,0,0.2),inset_0_8px_12px_rgba(255,255,255,0.68),inset_0_-12px_18px_rgba(0,0,0,0.12)]">
+      <div className="flex aspect-square items-center justify-center bg-[#f6f1ec] p-4 sm:p-5">
+        <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-[26px] bg-[#f1f1f1] shadow-[0_18px_34px_rgba(0,0,0,0.2),inset_0_8px_12px_rgba(255,255,255,0.68),inset_0_-12px_18px_rgba(0,0,0,0.12)] sm:max-w-[330px] sm:rounded-[34px]">
           <img
             src={image}
             alt={product.name}
@@ -490,15 +645,15 @@ function Shop() {
     <div className="min-h-screen bg-[#f8efe6] text-[#1a1a1a]">
       <Navbar />
 
-      <main className="min-h-[105vh] px-8 py-10">
-        <section className="mx-auto max-w-[1800px]">
-          <div className="sticky top-0 z-10 -mx-8 mb-7 flex flex-wrap items-center justify-center gap-3 bg-[#f8efe6] px-8 py-4 text-base font-semibold text-black lg:gap-5 lg:text-lg">
+      <main className="min-h-[105vh] px-4 py-8 sm:px-8 sm:py-10">
+        <section className="mx-auto w-full max-w-[1200px]">
+          <div className="sticky top-0 z-40 -mx-4 mb-7 flex overflow-x-auto bg-[#f8efe6] px-4 py-4 text-sm font-semibold text-black [scrollbar-width:none] sm:-mx-8 sm:flex-wrap sm:justify-center sm:gap-3 sm:px-8 sm:text-base lg:gap-5 lg:text-lg">
             {categories.map((category) => (
               <button
                 key={category.value}
                 type="button"
                 onClick={() => updateCategory(category.value)}
-                className={`max-w-full rounded-full px-4 py-2 text-center leading-tight transition ${
+                className={`mr-2 shrink-0 rounded-full px-4 py-2 text-center leading-tight transition sm:mr-0 ${
                   activeCategory === category.value
                     ? "bg-[#ce272a] text-white"
                     : "bg-[#ffbcbc] text-[#790405] hover:bg-[#ce272a] hover:text-white"
@@ -507,16 +662,24 @@ function Shop() {
                 {category.label}
               </button>
             ))}
+            <button
+              type="button"
+              onClick={() => navigate("/customize")}
+              className="mr-2 inline-flex shrink-0 items-center justify-center gap-2 rounded-full border-2 border-[#790405] bg-[#ffef3f] px-4 py-2 text-center font-black leading-tight text-[#790405] shadow-[3px_3px_0px_#790405] transition hover:-translate-y-0.5 hover:bg-[#ffb43b] sm:mr-0"
+            >
+              <Sparkles size={18} />
+              Customize Your Own
+            </button>
           </div>
 
           <div
             className={
               isFilteredView
-                ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                : "columns-1 gap-4 md:columns-3 lg:columns-7"
+                ? "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+                : "columns-1 gap-4 sm:columns-2 lg:columns-4"
             }
           >
-            {visiblePins.map((product, index) => {
+            {visibleProducts.map((product, index) => {
               const productId = getProductId(product);
               const saved = isInWishlist(productId);
               const isAdded = addedProductId === productId;
@@ -524,7 +687,7 @@ function Shop() {
               return (
               <article
                 key={`${product.name}-${index}`}
-                className={`group ${
+                className={`group relative z-0 ${
                   isFilteredView
                     ? "w-full"
                     : "mb-5 inline-block w-full break-inside-avoid"
@@ -532,14 +695,14 @@ function Shop() {
               >
                 <div className="relative overflow-hidden rounded-2xl bg-white">
                   {renderProductPreview(product)}
-                  <div className="absolute inset-0 bg-black/0 transition group-hover:bg-black/20" />
+                  <div className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/20" />
                   <button
                     type="button"
                     onClick={() => handleToggleWishlist(product)}
-                    className={`absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full shadow-lg transition group-hover:opacity-100 ${
+                    className={`absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full shadow-lg transition sm:group-hover:opacity-100 ${
                       saved
                         ? "bg-[#e60023] text-white opacity-100"
-                        : "bg-white text-[#790405] opacity-0"
+                        : "bg-white text-[#790405] opacity-100 sm:opacity-0"
                     }`}
                     aria-label={
                       saved
@@ -550,19 +713,6 @@ function Shop() {
                   >
                     <Bookmark size={20} fill={saved ? "currentColor" : "none"} />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAddToCart(product)}
-                    className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-black opacity-0 shadow-lg transition group-hover:opacity-100"
-                    aria-label={`Add ${product.name} to cart`}
-                  >
-                    <ShoppingCart size={18} />
-                  </button>
-                  {isAdded && (
-                    <div className="pointer-events-none absolute bottom-14 right-3 rounded-full border-2 border-[#790405] bg-[#2f9f9a] px-4 py-2 text-sm font-black text-white shadow-xl">
-                      Added!
-                    </div>
-                  )}
                 </div>
 
                 <div className="px-1 pt-2">
@@ -570,7 +720,6 @@ function Shop() {
                     <h2 className="line-clamp-1 text-sm font-semibold text-black">
                       {product.name}
                     </h2>
-                    <span className="text-lg leading-none">...</span>
                   </div>
                   <div className="mt-1 flex items-center justify-between gap-3">
                     <p className="text-sm font-bold text-[#2f9f9a]">
@@ -584,6 +733,12 @@ function Shop() {
                       Add
                     </button>
                   </div>
+                  {isAdded && (
+                    <p className="mt-1 text-xs font-black text-[#2f9f9a]">
+                      Added!
+                    </p>
+                  )}
+              
                 </div>
               </article>
               );

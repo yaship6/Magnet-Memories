@@ -12,14 +12,14 @@ function Wishlist() {
     <div className="min-h-screen bg-[#f8efe6] text-[#1a1a1a]">
       <Navbar />
 
-      <main className="min-h-[80vh] px-5 py-16 sm:px-8 lg:px-16 lg:py-20">
-        <section className="mx-auto max-w-6xl">
-          <div className="flex flex-wrap items-end justify-between gap-5">
+      <main className="min-h-[80vh] px-4 py-12 sm:px-8 lg:px-16 lg:py-20">
+        <section className="mx-auto w-full max-w-[1200px]">
+          <div className="flex flex-col items-stretch gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-5xl font-black text-[#ce272a] sm:text-6xl">
+              <h1 className="text-4xl font-black text-[#ce272a] sm:text-6xl">
                 Wishlist
               </h1>
-              <p className="mt-4 text-xl text-gray-700">
+              <p className="mt-3 text-base text-gray-700 sm:mt-4 sm:text-xl">
                 {user
                   ? `${customerDisplayName}'s saved magnets`
                   : "Login to save favorite magnets for later."}
@@ -28,7 +28,7 @@ function Wishlist() {
 
             <Link
               to="/shop"
-              className="rounded-full bg-[#2f9f9a] px-6 py-3 text-lg font-semibold text-white"
+              className="w-full rounded-full bg-[#2f9f9a] px-6 py-3 text-center text-base font-semibold text-white sm:w-auto sm:text-lg"
             >
               Shop Magnets
             </Link>
@@ -37,27 +37,27 @@ function Wishlist() {
           {!user && (
             <Link
               to="/login"
-              className="mt-8 inline-flex rounded-full bg-[#ce272a] px-7 py-3 text-lg font-semibold text-white"
+              className="mt-8 inline-flex w-full justify-center rounded-full bg-[#ce272a] px-7 py-3 text-base font-semibold text-white sm:w-auto sm:text-lg"
             >
               Login
             </Link>
           )}
 
           {wishlistItems.length === 0 ? (
-            <div className="mt-10 rounded-[32px] bg-[#ffbcbc] p-10 text-center shadow-xl">
+            <div className="mt-10 rounded-[28px] bg-[#ffbcbc] p-6 text-center shadow-xl sm:rounded-[32px] sm:p-10">
               <BookmarkX className="mx-auto text-[#ce272a]" size={48} />
-              <p className="mt-4 text-3xl font-black text-[#ce272a]">
+              <p className="mt-4 text-2xl font-black text-[#ce272a] sm:text-3xl">
                 Your wishlist is empty.
               </p>
               <Link
                 to="/shop"
-                className="mt-6 inline-flex rounded-full bg-[#ce272a] px-8 py-4 text-lg font-semibold text-white"
+                className="mt-6 inline-flex w-full justify-center rounded-full bg-[#ce272a] px-8 py-4 text-base font-semibold text-white sm:w-auto sm:text-lg"
               >
                 Find Favorites
               </Link>
             </div>
           ) : (
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {wishlistItems.map((item) => (
                 <article
                   key={item.id}
@@ -66,12 +66,12 @@ function Wishlist() {
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="h-72 w-full object-cover"
+                    className="h-56 w-full object-cover sm:h-72"
                   />
 
                   <div className="grid gap-4 p-5">
                     <div>
-                      <h2 className="text-2xl font-black text-[#790405]">
+                      <h2 className="text-xl font-black text-[#790405] sm:text-2xl">
                         {item.name}
                       </h2>
                       <p className="mt-1 text-base text-gray-700">

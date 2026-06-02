@@ -3,30 +3,127 @@ import {
   ChevronDown,
   ClipboardList,
   LogOut,
+  Menu,
   ShoppingCart,
   UserRound,
+  X,
 } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useStore } from "../context/StoreContext";
 import logoImage from "../../Untitled (Your Story).png";
 
 function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cartCount, logout, user, wishlistCount } = useStore();
   const userDisplayName = user?.name ?? user?.gmail ?? user?.email ?? "Account";
   const navLinkClass =
-    "flex min-h-10 items-center justify-center rounded-full border-2 border-[#790405] bg-[#ca3a3c] px-4 py-2 text-center text-base font-semibold leading-none text-white transition-all duration-300 hover:border-[#ff9999] hover:bg-[#5a0205]";
+    "flex min-h-10 items-center justify-center rounded-full border-2 border-[#790405] bg-[#ca3a3c] px-3 py-2 text-center text-sm font-semibold leading-none text-white transition-all duration-300 hover:border-[#ff9999] hover:bg-[#5a0205] sm:px-4 sm:text-base";
+  const mobileNavLinkClass =
+    "flex min-h-12 w-full items-center justify-center rounded-2xl border-2 border-[#790405] bg-[#ca3a3c] px-4 py-3 text-center text-base font-semibold leading-none text-white";
   const accountMenuItemClass =
     "flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-base font-semibold text-[#790405] transition hover:bg-[#ffbcbc]";
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <nav className="relative z-20 grid min-h-20 min-w-[1440px] grid-cols-[280px_1fr_auto] items-center gap-8 bg-[#2f9f9a] px-8 py-3">
-      <img
-        src={logoImage}
-        alt="The Memory Magnets"
-        className="absolute bottom-[-56px] left-8 z-30 h-32 rounded-lg"
-      />
+    <nav className="relative z-50 bg-[#2f9f9a] px-4 py-1 sm:px-6 sm:py-1 lg:grid lg:min-h-12 lg:grid-cols-[220px_1fr_auto] lg:items-center lg:gap-5 lg:px-8 lg:py-0">
+      <div className="relative z-30 flex items-center justify-between lg:block">
+        <Link
+          to="/"
+          onClick={closeMenu}
+          aria-label="Go to homepage"
+          className="inline-flex translate-y-1"
+        >
+          <img
+            src={logoImage}
+            alt="The Memory Magnets"
+            className="h-20 rounded-lg sm:h-24 lg:h-24"
+          />
+        </Link>
+        <button
+          type="button"
+          onClick={() => setIsMenuOpen((open) => !open)}
+          className="inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#790405] bg-[#ca3a3c] text-white lg:hidden"
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isMenuOpen}
+        >
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
 
-      <div className="z-20 col-start-2 flex -translate-x-8 items-center justify-center gap-3 whitespace-nowrap text-white">
+      <div
+        className={`relative z-30 mt-4 grid gap-2 rounded-[24px] bg-[#2a8f8b] p-3 shadow-xl lg:hidden ${
+          isMenuOpen ? "grid" : "hidden"
+        }`}
+      >
+        <Link to="/" onClick={closeMenu} className={mobileNavLinkClass}>
+          Home
+        </Link>
+        <Link to="/shop" onClick={closeMenu} className={mobileNavLinkClass}>
+          Shop
+        </Link>
+        <Link to="/customize" onClick={closeMenu} className={mobileNavLinkClass}>
+          Customize
+        </Link>
+        <Link
+          to="/cart"
+          onClick={closeMenu}
+          className={`${mobileNavLinkClass} gap-2`}
+        >
+          <ShoppingCart size={19} />
+          <span>Cart</span>
+          {cartCount > 0 && (
+            <span className="rounded-full bg-[#2f9f9a] px-2 py-0.5 text-sm text-white">
+              {cartCount}
+            </span>
+          )}
+        </Link>
+        {user ? (
+          <>
+            <Link
+              to="/profile-edit"
+              onClick={closeMenu}
+              className={mobileNavLinkClass}
+            >
+              Profile Edit
+            </Link>
+            <Link
+              to="/wishlist"
+              onClick={closeMenu}
+              className={`${mobileNavLinkClass} gap-2`}
+            >
+              <Bookmark size={19} />
+              <span>Wishlist</span>
+              {wishlistCount > 0 && (
+                <span className="rounded-full bg-[#2f9f9a] px-2 py-0.5 text-sm text-white">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+            <Link to="/orders" onClick={closeMenu} className={mobileNavLinkClass}>
+              Orders
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                closeMenu();
+              }}
+              className={mobileNavLinkClass}
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" onClick={closeMenu} className={mobileNavLinkClass}>
+              Login / Signup
+            </Link>
+          </>
+        )}
+      </div>
+
+      <div className="z-20 hidden min-w-0 flex-wrap items-center justify-center gap-2 text-white lg:col-start-2 lg:flex">
         <Link to="/" className={navLinkClass}>
           Home
         </Link>
@@ -36,18 +133,10 @@ function Navbar() {
         <Link to="/customize" className={navLinkClass}>
           Customize
         </Link>
-        <Link to="/order-feedback" className={navLinkClass}>
-          Feedback
-        </Link>
-        <Link to="/society-stalls" className={navLinkClass}>
-          Society Stalls
-        </Link>
       </div>
 
-      <div className="z-20 col-start-3 flex items-center justify-end gap-3 whitespace-nowrap text-white">
-        <Link to="/contact" className={navLinkClass}>
-          Contact
-        </Link>
+      <div className="z-20 hidden min-w-0 flex-wrap items-center justify-end gap-2 text-white lg:col-start-3 lg:flex">
+        
         <Link to="/cart" className={`${navLinkClass} gap-2`}>
           <ShoppingCart size={19} />
           <span>Cart</span>
@@ -119,10 +208,7 @@ function Navbar() {
         ) : (
           <>
             <Link to="/login" className={navLinkClass}>
-              Login
-            </Link>
-            <Link to="/signup" className={navLinkClass}>
-              Signup
+              Login / Signup
             </Link>
           </>
         )}
@@ -132,7 +218,7 @@ function Navbar() {
         aria-hidden="true"
         viewBox="0 0 1440 36"
         preserveAspectRatio="none"
-        className="absolute bottom-[-19px] left-0 z-10 h-5 w-full rotate-180 text-[#2f9f9a]"
+        className="pointer-events-none absolute bottom-[-19px] left-0 z-0 h-5 w-full rotate-180 text-[#2f9f9a]"
       >
         <path
           fill="currentColor"

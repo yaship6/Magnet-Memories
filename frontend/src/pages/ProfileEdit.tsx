@@ -50,13 +50,13 @@ function ProfileEdit() {
     <div className="min-h-screen bg-[#f8efe6] text-[#1a1a1a]">
       <Navbar />
 
-      <main className="flex min-h-[80vh] items-center justify-center px-8 py-20">
+      <main className="flex min-h-[80vh] items-center justify-center px-4 py-12 sm:px-8 sm:py-20">
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-xl rounded-[40px] bg-[#ca3a3c] p-10 text-white shadow-[0px_24px_70px_rgba(121,4,5,0.28)]"
+          className="w-full max-w-xl rounded-[28px] bg-[#ca3a3c] p-5 text-white shadow-[0px_24px_70px_rgba(121,4,5,0.28)] sm:rounded-[40px] sm:p-10"
         >
-          <h1 className="text-5xl font-black">Profile Edit</h1>
-          <p className="mt-4 text-xl text-[#ffe1dc]">
+          <h1 className="text-4xl font-black sm:text-5xl">Profile Edit</h1>
+          <p className="mt-4 text-base text-[#ffe1dc] sm:text-xl">
             Keep your account details ready for orders.
           </p>
 
@@ -105,17 +105,17 @@ function ProfileEdit() {
             </p>
           )}
 
-          <div className="mt-8 flex items-center gap-4">
+          <div className="mt-8 grid gap-3 sm:flex sm:items-center sm:gap-4">
             <button
               type="submit"
               disabled={isSaving}
-              className="rounded-2xl border-2 border-[#790405] bg-[#5a0205] px-8 py-4 text-xl font-semibold text-white transition hover:scale-105 hover:border-[#ff9999] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
+              className="rounded-2xl border-2 border-[#790405] bg-[#5a0205] px-8 py-4 text-lg font-semibold text-white transition hover:scale-105 hover:border-[#ff9999] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 sm:text-xl"
             >
               {isSaving ? "Saving..." : "Save Profile"}
             </button>
             <Link
               to="/shop"
-              className="rounded-2xl border-2 border-[#790405] bg-[#f8efe6] px-8 py-4 text-xl font-semibold text-[#790405]"
+              className="rounded-2xl border-2 border-[#790405] bg-[#f8efe6] px-8 py-4 text-center text-lg font-semibold text-[#790405] sm:text-xl"
             >
               Cancel
             </Link>

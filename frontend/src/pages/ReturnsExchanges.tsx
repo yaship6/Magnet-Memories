@@ -8,13 +8,13 @@ function ReturnsExchanges() {
     <div className="min-h-screen bg-[#f8efe6] text-[#1a1a1a]">
       <Navbar />
 
-      <main className="min-h-[95vh] px-5 py-16 sm:px-8 lg:px-16 lg:py-28">
-        <section className="mx-auto max-w-5xl">
+      <main className="min-h-[95vh] px-4 py-12 sm:px-8 lg:px-16 lg:py-28">
+        <section className="mx-auto w-full max-w-[1200px]">
           <motion.h1
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="text-5xl font-black leading-tight text-[#ce272a] sm:text-6xl"
+            className="text-4xl font-black leading-tight text-[#ce272a] sm:text-6xl"
           >
             Returns & Exchanges
           </motion.h1>
@@ -23,19 +23,19 @@ function ReturnsExchanges() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15 }}
-            className="mt-5 max-w-3xl text-xl leading-relaxed text-gray-700"
+            className="mt-4 max-w-3xl text-base leading-relaxed text-gray-700 sm:mt-5 sm:text-xl"
           >
             Since our products are made with personal photos and custom details,
             returns and exchanges are not accepted unless the item arrives broken
             or damaged.
           </motion.p>
 
-          <div className="mt-14 grid grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] gap-8">
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:mt-14 sm:grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] sm:gap-8">
             <motion.div
               initial={{ opacity: 0, y: 34 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.25 }}
-              className="rounded-[28px] border border-[#2f9f9a]/30 bg-[#fffaf7] p-8 shadow-xl"
+              className="rounded-[24px] border border-[#2f9f9a]/30 bg-[#fffaf7] p-5 shadow-xl sm:rounded-[28px] sm:p-8"
             >
               <AlertTriangle className="mb-5 text-[#2f9f9a]" size={36} />
               <h2 className="text-2xl font-black text-[#ce272a]">
@@ -51,7 +51,7 @@ function ReturnsExchanges() {
               initial={{ opacity: 0, y: 34 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.35 }}
-              className="rounded-[28px] border border-[#2f9f9a]/30 bg-[#fffaf7] p-8 shadow-xl"
+              className="rounded-[24px] border border-[#2f9f9a]/30 bg-[#fffaf7] p-5 shadow-xl sm:rounded-[28px] sm:p-8"
             >
               <Camera className="mb-5 text-[#2f9f9a]" size={36} />
               <h2 className="text-2xl font-black text-[#ce272a]">
@@ -67,7 +67,7 @@ function ReturnsExchanges() {
               initial={{ opacity: 0, y: 34 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.45 }}
-              className="rounded-[28px] border border-[#2f9f9a]/30 bg-[#fffaf7] p-8 shadow-xl"
+              className="rounded-[24px] border border-[#2f9f9a]/30 bg-[#fffaf7] p-5 shadow-xl sm:rounded-[28px] sm:p-8"
             >
               <Mail className="mb-5 text-[#2f9f9a]" size={36} />
               <h2 className="text-2xl font-black text-[#ce272a]">

@@ -20,6 +20,7 @@ export type CartItem = {
   price: string;
   category: string;
   image: string;
+  customImages?: string[];
   quantity: number;
 };
 

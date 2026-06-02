@@ -144,6 +144,189 @@ function getPriceNumber(price) {
   return Number(String(price).replace(/[^0-9]/g, ""));
 }
 
+function getPexelsConfig() {
+  const apiKey = process.env.PEXELS_API_KEY?.trim();
+
+  if (!apiKey) {
+    return null;
+  }
+
+  return {
+    apiKey,
+    baseUrl:
+      process.env.PEXELS_API_BASE_URL?.trim() ?? "https://api.pexels.com/v1",
+  };
+}
+
+function getRazorpayConfig() {
+  const keyId = process.env.RAZORPAY_KEY_ID?.trim().replace(/^["']|["']$/g, "");
+  const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim().replace(/^["']|["']$/g, "");
+
+  if (!keyId || !keySecret) {
+    return null;
+  }
+
+  return {
+    keyId,
+    keySecret,
+    baseUrl:
+      process.env.RAZORPAY_API_BASE_URL?.trim() ??
+      "https://api.razorpay.com/v1",
+  };
+}
+
+function getRazorpayErrorMessage(responseText) {
+  try {
+    const parsed = JSON.parse(responseText);
+    const description = parsed?.error?.description;
+    const code = parsed?.error?.code;
+
+    if (code === "BAD_REQUEST_ERROR" && description === "Authentication failed") {
+      return "Razorpay authentication failed. Check that RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are copied from the same Razorpay test/live key pair, then restart the backend.";
+    }
+
+    if (description) {
+      return `Razorpay error: ${description}`;
+    }
+  } catch {
+    // Razorpay may return plain text for some failures.
+  }
+
+  return responseText || "Razorpay request failed.";
+}
+
+async function createRazorpayOrder({ amount, receipt, notes = {} }) {
+  const razorpay = getRazorpayConfig();
+
+  if (!razorpay) {
+    throw new Error(
+      "Razorpay is not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET."
+    );
+  }
+
+  const amountInPaise = Math.round(Number(amount) * 100);
+
+  if (!Number.isFinite(amountInPaise) || amountInPaise <= 0) {
+    throw new Error("A valid payment amount is required.");
+  }
+
+  const credentials = Buffer.from(
+    `${razorpay.keyId}:${razorpay.keySecret}`
+  ).toString("base64");
+
+  const result = await fetch(`${razorpay.baseUrl}/orders`, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${credentials}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      amount: amountInPaise,
+      currency: "INR",
+      receipt,
+      notes,
+    }),
+  });
+  const responseText = await result.text();
+
+  if (!result.ok) {
+    throw new Error(getRazorpayErrorMessage(responseText));
+  }
+
+  const order = responseText ? JSON.parse(responseText) : {};
+
+  return {
+    keyId: razorpay.keyId,
+    order,
+  };
+}
+
+function verifyRazorpaySignature({
+  razorpayOrderId,
+  razorpayPaymentId,
+  razorpaySignature,
+}) {
+  const razorpay = getRazorpayConfig();
+
+  if (!razorpay) {
+    throw new Error(
+      "Razorpay is not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET."
+    );
+  }
+
+  const generatedSignature = crypto
+    .createHmac("sha256", razorpay.keySecret)
+    .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+    .digest("hex");
+
+  const generatedBuffer = Buffer.from(generatedSignature);
+  const receivedBuffer = Buffer.from(String(razorpaySignature));
+
+  if (generatedBuffer.length !== receivedBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(generatedBuffer, receivedBuffer);
+}
+
+function normalizePexelsPhoto(photo) {
+  const image =
+    photo?.src?.large2x ??
+    photo?.src?.large ??
+    photo?.src?.medium ??
+    photo?.src?.original ??
+    "";
+
+  if (!photo?.id || !image) {
+    return null;
+  }
+
+  return {
+    id: String(photo.id),
+    title: String(photo.alt ?? "Pexels inspiration"),
+    description: String(photo.alt ?? ""),
+    image,
+    photographer: String(photo.photographer ?? ""),
+    photographerUrl: String(photo.photographer_url ?? ""),
+    pexelsUrl: String(photo.url ?? ""),
+  };
+}
+
+async function searchPexelsPhotos({
+  query = "happy family memories",
+  pageSize = 30,
+} = {}) {
+  const pexels = getPexelsConfig();
+
+  if (!pexels) {
+    throw new Error("Pexels is not configured. Set PEXELS_API_KEY.");
+  }
+
+  const url = new URL(`${pexels.baseUrl}/search`);
+  url.searchParams.set("query", query);
+  url.searchParams.set("per_page", String(Math.min(Math.max(pageSize, 1), 80)));
+  url.searchParams.set("orientation", "portrait");
+
+  const result = await fetch(url, {
+    headers: {
+      Authorization: pexels.apiKey,
+    },
+  });
+  const responseText = await result.text();
+
+  if (!result.ok) {
+    throw new Error(responseText || "Pexels request failed.");
+  }
+
+  const data = responseText ? JSON.parse(responseText) : {};
+
+  return {
+    items: (data.photos ?? []).map(normalizePexelsPhoto).filter(Boolean),
+    page: data.page ?? null,
+    nextPage: data.next_page ?? null,
+  };
+}
+
 function normalizeOrderItems(items) {
   if (!Array.isArray(items)) {
     return [];
@@ -162,10 +345,26 @@ function normalizeOrderItems(items) {
         unitPrice,
         quantity,
         image: String(item.image ?? ""),
+        customImages: Array.isArray(item.customImages)
+          ? item.customImages.map((image) => String(image ?? "")).filter(Boolean)
+          : [],
         lineTotal: unitPrice * quantity,
       };
     })
     .filter((item) => item.id && item.name && item.unitPrice > 0);
+}
+
+function parseDataImageUrl(value) {
+  const match = String(value).match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    contentType: match[1],
+    buffer: Buffer.from(match[2], "base64"),
+  };
 }
 
 function getSupabaseConfig() {
@@ -177,6 +376,93 @@ function getSupabaseConfig() {
   }
 
   return { url: url.replace(/\/$/, ""), key };
+}
+
+async function uploadSupabaseStorageObject({
+  bucketName,
+  objectPath,
+  contentType,
+  buffer,
+}) {
+  const supabase = getSupabaseConfig();
+
+  if (!supabase) {
+    throw new Error(
+      "Supabase is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
+    );
+  }
+
+  const result = await fetch(
+    `${supabase.url}/storage/v1/object/${bucketName}/${objectPath}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${supabase.key}`,
+        "Content-Type": contentType,
+        "x-upsert": "true",
+      },
+      body: buffer,
+    }
+  );
+  const responseText = await result.text();
+
+  if (!result.ok) {
+    throw new Error(responseText || "Supabase photo upload failed.");
+  }
+
+  return `${supabase.url}/storage/v1/object/public/${bucketName}/${objectPath}`;
+}
+
+function getImageExtension(contentType) {
+  const extensions = {
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+  };
+
+  return extensions[contentType] ?? "png";
+}
+
+async function uploadOrderItemPhotos(items) {
+  const orderPhotoBucket = "order-photos";
+  const folder = `orders/${new Date().toISOString().slice(0, 10)}`;
+
+  return Promise.all(
+    items.map(async (item) => {
+      const images = item.customImages.length > 0 ? item.customImages : [item.image];
+      const uploadedImages = [];
+
+      for (const [index, image] of images.entries()) {
+        const parsedImage = parseDataImageUrl(image);
+
+        if (!parsedImage) {
+          if (image) {
+            uploadedImages.push(image);
+          }
+          continue;
+        }
+
+        const extension = getImageExtension(parsedImage.contentType);
+        const objectPath = `${folder}/${item.id}-${index + 1}.${extension}`;
+        const photoUrl = await uploadSupabaseStorageObject({
+          bucketName: orderPhotoBucket,
+          objectPath,
+          contentType: parsedImage.contentType,
+          buffer: parsedImage.buffer,
+        });
+
+        uploadedImages.push(photoUrl);
+      }
+
+      return {
+        ...item,
+        image: uploadedImages[0] ?? item.image,
+        customImages: uploadedImages,
+      };
+    })
+  );
 }
 
 async function requestSupabaseTable(tableName, options = {}) {
@@ -225,6 +511,23 @@ async function createSupabaseOrder(order) {
   }
 
   return createdOrder;
+}
+
+async function updateSupabaseOrder(id, patch) {
+  const orders = await requestSupabaseTable("orders", {
+    method: "PATCH",
+    query: `id=eq.${encodeURIComponent(id)}&select=*`,
+    prefer: "return=representation",
+    body: patch,
+  });
+
+  const updatedOrder = Array.isArray(orders) ? orders[0] : orders;
+
+  if (!updatedOrder) {
+    throw new Error("Supabase order row was not updated.");
+  }
+
+  return updatedOrder;
 }
 
 async function createSupabaseFeedback(feedback) {
@@ -401,6 +704,47 @@ async function sendGmailMessage({ to, subject, text }) {
   return { skipped: false };
 }
 
+async function sendOrderConfirmationEmail(order, to) {
+  const emailConfigured = Boolean(
+    (process.env.EMAIL_USER ?? process.env.GMAIL_USER)?.trim() &&
+      (process.env.EMAIL_PASS ?? process.env.GMAIL_APP_PASSWORD)?.trim()
+  );
+
+  if (!emailConfigured) {
+    return {
+      emailSent: false,
+      emailMessage: "Confirmation email is not configured.",
+    };
+  }
+
+  try {
+    const result = await sendGmailMessage({
+      to,
+      subject: `Memory Magnets order confirmation ${order.id.slice(0, 8)}`,
+      text: formatOrderEmail(order),
+    });
+
+    if (result.skipped) {
+      return {
+        emailSent: false,
+        emailMessage: "Confirmation email is not configured.",
+      };
+    }
+
+    return {
+      emailSent: true,
+      emailMessage: "Confirmation email sent.",
+    };
+  } catch (emailError) {
+    console.error("Confirmation email could not be sent:", emailError);
+
+    return {
+      emailSent: false,
+      emailMessage: "Order saved. Confirmation email could not be sent.",
+    };
+  }
+}
+
 app.get("/api/health", (_request, response) => {
   response.json({ ok: true });
 });
@@ -414,8 +758,108 @@ app.get("/api/config-check", (_request, response) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY
     ),
     frontendUrlConfigured: Boolean(process.env.FRONTEND_URL),
+    pexelsConfigured: Boolean(process.env.PEXELS_API_KEY),
+    razorpayConfigured: Boolean(
+      process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET
+    ),
+    razorpayMode: process.env.RAZORPAY_KEY_ID?.trim().startsWith("rzp_live")
+      ? "live"
+      : process.env.RAZORPAY_KEY_ID?.trim().startsWith("rzp_test")
+      ? "test"
+      : "unknown",
     nodeVersion: process.version,
   });
+});
+
+app.get("/api/pexels/photos", async (request, response) => {
+  try {
+    const pageSize = Number(request.query.pageSize ?? 30);
+    const query = String(
+      request.query.query ?? "personalized gifts happy memories"
+    ).trim();
+    const photos = await searchPexelsPhotos({
+      query,
+      pageSize: Number.isFinite(pageSize) ? pageSize : 30,
+    });
+
+    return response.json(photos);
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({
+      message:
+        error instanceof Error
+          ? error.message
+          : "Could not load Pexels photos.",
+    });
+  }
+});
+
+app.post("/api/payments/razorpay/order", async (request, response) => {
+  try {
+    const body = request.body ?? {};
+    const amount = Number(body.amount);
+    const receipt = String(body.receipt ?? `mm-${Date.now()}`).slice(0, 40);
+    const notes =
+      body.notes && typeof body.notes === "object" ? body.notes : {};
+    const razorpayOrder = await createRazorpayOrder({
+      amount,
+      receipt,
+      notes,
+    });
+
+    return response.status(201).json(razorpayOrder);
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({
+      message:
+        error instanceof Error
+          ? error.message
+          : "Could not create Razorpay order.",
+    });
+  }
+});
+
+app.post("/api/payments/razorpay/verify", async (request, response) => {
+  try {
+    const body = request.body ?? {};
+    const razorpayOrderId = String(body.razorpay_order_id ?? "").trim();
+    const razorpayPaymentId = String(body.razorpay_payment_id ?? "").trim();
+    const razorpaySignature = String(body.razorpay_signature ?? "").trim();
+
+    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      return response.status(400).json({
+        message: "Razorpay order, payment, and signature are required.",
+      });
+    }
+
+    const verified = verifyRazorpaySignature({
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature,
+    });
+
+    if (!verified) {
+      return response.status(400).json({
+        message: "Payment verification failed.",
+      });
+    }
+
+    return response.json({
+      verified: true,
+      payment: {
+        razorpayOrderId,
+        razorpayPaymentId,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({
+      message:
+        error instanceof Error
+          ? error.message
+          : "Could not verify Razorpay payment.",
+    });
+  }
 });
 
 app.post("/api/auth/signup", async (request, response) => {
@@ -571,6 +1015,14 @@ app.post("/api/orders", async (request, response) => {
   const customerUserId = customer.id ? String(customer.id).trim() : null;
   const deliveryAddress = String(request.body.deliveryAddress ?? "").trim();
   const notes = String(request.body.notes ?? "").trim();
+  const payment = request.body.payment ?? {};
+  const paymentMethod = String(payment.method ?? "").trim();
+  const razorpayOrderId = String(payment.razorpayOrderId ?? "").trim();
+  const razorpayPaymentId = String(payment.razorpayPaymentId ?? "").trim();
+  const razorpaySignature = String(payment.razorpaySignature ?? "").trim();
+  const phonepeTransactionId = String(
+    payment.phonepeTransactionId ?? ""
+  ).trim();
   const items = normalizeOrderItems(request.body.items);
 
   if (!customerName || !customerGmail || !customerPhone || !deliveryAddress) {
@@ -586,6 +1038,38 @@ app.post("/api/orders", async (request, response) => {
   const totalAmount = items.reduce((sum, item) => sum + item.lineTotal, 0);
 
   try {
+    if (paymentMethod === "razorpay") {
+      if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+        return response.status(400).json({
+          message: "Razorpay order, payment, and signature are required.",
+        });
+      }
+
+      const verified = verifyRazorpaySignature({
+        razorpayOrderId,
+        razorpayPaymentId,
+        razorpaySignature,
+      });
+
+      if (!verified) {
+        return response.status(400).json({
+          message: "Payment verification failed.",
+        });
+      }
+    } else if (paymentMethod === "phonepe") {
+      if (!phonepeTransactionId) {
+        return response.status(400).json({
+          message: "PhonePe/UPI transaction ID is required.",
+        });
+      }
+    } else {
+      return response.status(400).json({
+        message: "Choose Razorpay or PhonePe/UPI payment.",
+      });
+    }
+
+    const orderItems = await uploadOrderItemPhotos(items);
+    const now = new Date().toISOString();
     const order = await createSupabaseOrder({
       customer_user_id: customerUserId,
       customer_name: customerName,
@@ -593,35 +1077,53 @@ app.post("/api/orders", async (request, response) => {
       customer_gmail: customerGmail,
       customer_phone: customerPhone,
       delivery_address: deliveryAddress,
-      notes,
-      items,
+      notes: [
+        notes,
+        paymentMethod ? `Payment method: ${paymentMethod}` : "",
+        razorpayOrderId ? `Razorpay order: ${razorpayOrderId}` : "",
+        razorpayPaymentId ? `Razorpay payment: ${razorpayPaymentId}` : "",
+        phonepeTransactionId
+          ? `PhonePe/UPI transaction: ${phonepeTransactionId}`
+          : "",
+      ]
+        .filter(Boolean)
+        .join("\n"),
+      items: orderItems,
       total_amount: totalAmount,
+      payment_method: paymentMethod,
+      razorpay_order_id: razorpayOrderId || null,
+      razorpay_payment_id: razorpayPaymentId || null,
+      phonepe_transaction_id: phonepeTransactionId || null,
+      payment_verified_at: paymentMethod === "razorpay" ? now : null,
+      status:
+        paymentMethod === "razorpay"
+          ? "payment_verified"
+          : "payment_submitted",
     });
 
-    const emailConfigured = Boolean(
-      (process.env.EMAIL_USER ?? process.env.GMAIL_USER)?.trim() &&
-        (process.env.EMAIL_PASS ?? process.env.GMAIL_APP_PASSWORD)?.trim()
-    );
-    const emailMessage = emailConfigured
-      ? "Order saved. Confirmation email is being sent."
-      : "Confirmation email is not configured.";
+    const emailResult = await sendOrderConfirmationEmail(order, customerGmail);
+    const updatedOrder = await updateSupabaseOrder(order.id, {
+      status:
+        paymentMethod === "razorpay"
+          ? "confirmed"
+          : "pending_payment_review",
+      order_confirmed_at: new Date().toISOString(),
+      confirmation_email_sent: emailResult.emailSent,
+      confirmation_email_message: emailResult.emailMessage,
+      confirmation_email_sent_at: emailResult.emailSent
+        ? new Date().toISOString()
+        : null,
+    });
 
-    if (emailConfigured) {
-      sendGmailMessage({
-        to: customerGmail,
-        subject: `Memory Magnets order confirmation ${order.id.slice(0, 8)}`,
-        text: formatOrderEmail(order),
-      }).catch((emailError) => {
-        console.error("Confirmation email could not be sent:", emailError);
-      });
-    }
-
-    return response.status(201).json({ order, emailSent: false, emailMessage });
+    return response.status(201).json({ order: updatedOrder, ...emailResult });
   } catch (error) {
     console.error(error);
+    const errorMessage = getSupabaseErrorMessage(error);
+
     return response.status(500).json({
-      message:
-        error instanceof Error ? error.message : "Could not place order.",
+      message: errorMessage.includes("Could not find")
+        ? "Supabase orders table is missing payment confirmation columns. Run backend/supabase-orders-payment-confirmation.sql in Supabase, then try again."
+        : errorMessage || "Could not place order.",
     });
   }
 });
@@ -722,6 +1224,56 @@ app.get("/api/orders", async (request, response) => {
         error instanceof Error ? error.message : "Could not load orders.",
     });
   }
+});
+
+app.get("/api/orders/stream", async (request, response) => {
+  const gmail = String(request.query.gmail ?? "").trim().toLowerCase();
+
+  if (!gmail) {
+    return response.status(400).json({ message: "Gmail is required." });
+  }
+
+  response.setHeader("Content-Type", "text/event-stream");
+  response.setHeader("Cache-Control", "no-cache");
+  response.setHeader("Connection", "keep-alive");
+  response.setHeader("X-Accel-Buffering", "no");
+  response.flushHeaders?.();
+
+  let closed = false;
+  let lastPayload = "";
+
+  const sendOrders = async () => {
+    if (closed) {
+      return;
+    }
+
+    try {
+      const orders = await listSupabaseOrdersByGmail(gmail);
+      const payload = JSON.stringify({ orders });
+
+      if (payload !== lastPayload) {
+        response.write(`event: orders\n`);
+        response.write(`data: ${payload}\n\n`);
+        lastPayload = payload;
+      } else {
+        response.write(`event: heartbeat\n`);
+        response.write(`data: ${JSON.stringify({ ok: true })}\n\n`);
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not stream orders.";
+      response.write(`event: error\n`);
+      response.write(`data: ${JSON.stringify({ message })}\n\n`);
+    }
+  };
+
+  await sendOrders();
+  const interval = setInterval(sendOrders, 3000);
+
+  request.on("close", () => {
+    closed = true;
+    clearInterval(interval);
+  });
 });
 
 app.listen(port, () => {

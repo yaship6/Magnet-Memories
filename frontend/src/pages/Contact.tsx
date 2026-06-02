@@ -96,9 +96,9 @@ function Contact() {
     <div className="min-h-screen bg-[#f8efe6] text-[#1a1a1a]">
       <Navbar />
 
-      <main className="min-h-[95vh] px-16 py-24">
-        <section className="mx-auto max-w-6xl">
-          <div className="grid grid-cols-[1.1fr_0.9fr] items-center gap-14">
+      <main className="min-h-[95vh] px-4 py-12 sm:px-8 lg:px-16 lg:py-24">
+        <section className="mx-auto w-full max-w-[1200px]">
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14">
             <motion.div
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
@@ -108,10 +108,10 @@ function Contact() {
                 <Sparkles size={18} />
                 Custom magnets, stalls, and gifting
               </p>
-              <h1 className="mt-6 text-6xl font-black leading-tight text-[#ce272a]">
+              <h1 className="mt-6 text-4xl font-black leading-tight text-[#ce272a] sm:text-6xl">
                 Contact Us
               </h1>
-              <p className="mt-5 max-w-2xl text-xl leading-relaxed text-gray-700">
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-gray-700 sm:text-xl">
                 Reach out for custom photo magnets, society stalls, bulk gifting,
                 order questions, or a design idea you want us to bring to life.
               </p>
@@ -121,10 +121,10 @@ function Contact() {
               initial={{ opacity: 0, y: 34 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.15 }}
-              className="rounded-[36px] border border-[#2f9f9a]/30 bg-[#fffaf7] p-6 shadow-xl"
+              className="rounded-[28px] border border-[#2f9f9a]/30 bg-[#fffaf7] p-5 shadow-xl sm:rounded-[36px] sm:p-6"
             >
-              <div className="grid grid-cols-[150px_1fr] items-center gap-6">
-                <div className="aspect-[4/5] w-full overflow-hidden rounded-[24px]">
+              <div className="grid grid-cols-1 items-center gap-6 sm:grid-cols-[150px_1fr]">
+                <div className="mx-auto aspect-[4/5] w-full max-w-[180px] overflow-hidden rounded-[24px] sm:max-w-none">
                   <img
                     src={founderImage}
                     alt="Sanjana Trivedi and Gaurav Dubey"
@@ -133,10 +133,10 @@ function Contact() {
                 </div>
                 <div>
                   <UserRound className="mb-3 text-[#2f9f9a]" size={34} />
-                  <h2 className="text-3xl font-black text-[#ce272a]">
+                  <h2 className="text-2xl font-black text-[#ce272a] sm:text-3xl">
                     Founders
                   </h2>
-                  <p className="mt-3 text-lg leading-relaxed text-gray-700">
+                  <p className="mt-3 text-base leading-relaxed text-gray-700 sm:text-lg">
                     Sanjana Trivedi & Gaurav Dubey
                   </p>
                   <p className="mt-3 text-base font-semibold text-[#790405]">
@@ -147,7 +147,7 @@ function Contact() {
             </motion.div>
           </div>
 
-          <div className="mt-12 grid grid-cols-4 gap-5">
+          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {contactActions.map((action, index) => {
               const Icon = action.icon;
 
@@ -165,7 +165,7 @@ function Contact() {
                   className="rounded-[28px] border border-[#2f9f9a]/30 bg-[#fffaf7] p-5 shadow-lg transition hover:-translate-y-1 hover:border-[#ce272a]/50"
                 >
                   <Icon className="text-[#2f9f9a]" size={32} />
-                  <h2 className="mt-4 text-2xl font-black text-[#ce272a]">
+                  <h2 className="mt-4 text-xl font-black text-[#ce272a] sm:text-2xl">
                     {action.title}
                   </h2>
                   <p className="mt-2 text-base font-semibold leading-relaxed text-gray-700">
@@ -176,23 +176,23 @@ function Contact() {
             })}
           </div>
 
-          <div className="mt-12 grid grid-cols-[1.1fr_0.9fr] gap-8">
+          <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <motion.form
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.35 }}
               onSubmit={handleSubmit}
-              className="rounded-[36px] bg-[#ca3a3c] p-8 text-white shadow-[0px_24px_70px_rgba(121,4,5,0.28)]"
+              className="rounded-[28px] bg-[#ca3a3c] p-5 text-white shadow-[0px_24px_70px_rgba(121,4,5,0.28)] sm:rounded-[36px] sm:p-8"
             >
-              <div className="flex items-center gap-3">
-                <Mail size={34} />
-                <h2 className="text-4xl font-black">Send a Message</h2>
+              <div className="flex min-w-0 flex-wrap items-center gap-3">
+                <Mail className="shrink-0" size={34} />
+                <h2 className="min-w-0 text-3xl font-black sm:text-4xl">Send a Message</h2>
               </div>
               <p className="mt-3 text-lg text-[#ffe1dc]">
                 Share what you need and we will get back to you with next steps.
               </p>
 
-              <div className="mt-7 grid grid-cols-2 gap-5">
+              <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <label className="flex flex-col gap-2 text-lg font-semibold">
                   Name
                   <input
@@ -258,7 +258,7 @@ function Contact() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-7 inline-flex items-center gap-3 rounded-2xl border-2 border-[#790405] bg-[#5a0205] px-8 py-4 text-xl font-semibold text-white transition hover:scale-105 hover:border-[#ff9999] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
+                className="mt-7 inline-flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-[#790405] bg-[#5a0205] px-8 py-4 text-lg font-semibold text-white transition hover:scale-105 hover:border-[#ff9999] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 sm:w-auto sm:text-xl"
               >
                 <Send size={22} />
                 {isSubmitting ? "Saving..." : "Send Message"}
@@ -292,7 +292,7 @@ function Contact() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <div className="rounded-[28px] border border-[#2f9f9a]/30 bg-[#fffaf7] p-5 shadow-lg">
                   <PackageCheck className="text-[#2f9f9a]" size={30} />
                   <h3 className="mt-4 text-xl font-black text-[#ce272a]">

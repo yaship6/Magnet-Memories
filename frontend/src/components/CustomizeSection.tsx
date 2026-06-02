@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, X } from "lucide-react";
+import { Check, ImagePlus, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../context/StoreContext";
@@ -50,13 +50,12 @@ function CustomizeSection() {
   const [fileInputKey, setFileInputKey] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [cartMessage, setCartMessage] = useState("");
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
   const needsThreeImages = magnetType === "Strip Acrylic Magnet Frames";
   const hasRequiredImages =
     needsThreeImages ? previewImages.length === 3 : previewImages.length === 1;
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []);
-
+  const loadImageFiles = (files: File[]) => {
     if (files.length === 0) {
       setPreviewImages([]);
       setImageAdjustments([]);
@@ -81,6 +80,21 @@ function CustomizeSection() {
       );
       setActiveImageIndex(0);
     });
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    loadImageFiles(Array.from(event.target.files ?? []));
+  };
+
+  const handleImageDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setIsDraggingImage(false);
+    loadImageFiles(
+      Array.from(event.dataTransfer.files).filter((file) =>
+        file.type.startsWith("image/")
+      )
+    );
+    setFileInputKey((currentKey) => currentKey + 1);
   };
 
   const updateMagnetType = (nextMagnetType: MagnetType) => {
@@ -261,9 +275,9 @@ function CustomizeSection() {
   const renderPreview = () => {
     if (magnetType === "Strip Acrylic Magnet Frames") {
       return (
-        <div className="relative flex h-[520px] w-[250px] max-w-full items-center justify-center sm:h-[560px] sm:w-[270px]">
+        <div className="relative flex h-[420px] w-[210px] max-w-full items-center justify-center sm:h-[560px] sm:w-[270px]">
           <div className="absolute bottom-8 h-14 w-44 rounded-full bg-black/20 blur-2xl" />
-          <div className="relative h-full w-[223px] rounded-[24px] bg-[#d8d5cb]/55 p-4 shadow-[0_26px_55px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur sm:w-[240px] sm:p-5">
+          <div className="relative h-full w-[190px] rounded-[24px] bg-[#d8d5cb]/55 p-3 shadow-[0_26px_55px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur sm:w-[240px] sm:p-5">
             <div className="absolute inset-y-3 left-3 w-3 rounded-l-[24px] bg-white/45 shadow-[inset_-2px_0_4px_rgba(0,0,0,0.16)]" />
             <div className="absolute inset-y-3 right-3 w-3 rounded-r-[24px] bg-black/10" />
             {[0, 1, 2, 3].map((corner) => (
@@ -303,9 +317,9 @@ function CustomizeSection() {
 
     if (magnetType === "Big Acrylic Magnet Frames") {
       return (
-        <div className="relative flex h-[430px] w-[330px] max-w-full items-center justify-center sm:h-[500px] sm:w-[380px]">
+        <div className="relative flex h-[340px] w-full max-w-full items-center justify-center sm:h-[500px] sm:w-[380px]">
           <div className="absolute bottom-8 h-14 w-56 rounded-full bg-black/18 blur-2xl" />
-          <div className="relative h-[400px] w-[300px] rounded-[24px] bg-[#e8e8e3]/58 p-4 shadow-[0_28px_56px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur sm:h-[480px] sm:w-[360px] sm:p-5">
+          <div className="relative h-[320px] w-[240px] rounded-[24px] bg-[#e8e8e3]/58 p-4 shadow-[0_28px_56px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur sm:h-[480px] sm:w-[360px] sm:p-5">
             <div className="absolute inset-y-3 left-2 w-2 rounded-l-[18px] bg-white/55 shadow-[inset_-2px_0_4px_rgba(0,0,0,0.12)]" />
             <div className="absolute inset-y-3 right-2 w-2 rounded-r-[18px] bg-black/8" />
             {[0, 1, 2, 3].map((corner) => (
@@ -336,9 +350,9 @@ function CustomizeSection() {
     }
 
     return (
-      <div className="relative flex h-[330px] w-[330px] max-w-full items-center justify-center sm:h-[430px] sm:w-[430px]">
+      <div className="relative flex h-[280px] w-full max-w-full items-center justify-center sm:h-[430px] sm:w-[430px]">
         <div className="absolute bottom-8 h-12 w-64 rounded-full bg-black/18 blur-2xl sm:w-80" />
-        <div className="relative h-[260px] w-[260px] rounded-[38px] bg-[#f1f1f1] shadow-[0_24px_46px_rgba(0,0,0,0.22),inset_0_10px_14px_rgba(255,255,255,0.72),inset_0_-14px_22px_rgba(0,0,0,0.14)] sm:h-[340px] sm:w-[340px] sm:rounded-[48px]">
+        <div className="relative h-[230px] w-[230px] rounded-[32px] bg-[#f1f1f1] shadow-[0_24px_46px_rgba(0,0,0,0.22),inset_0_10px_14px_rgba(255,255,255,0.72),inset_0_-14px_22px_rgba(0,0,0,0.14)] sm:h-[340px] sm:w-[340px] sm:rounded-[48px]">
           <div className="relative h-full overflow-hidden rounded-[38px] bg-[#f1f1f1] sm:rounded-[48px]">
             {renderPhoto(previewImages[0], "bg-[#f1f1f1]")}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/45 via-transparent to-black/16" />
@@ -371,6 +385,7 @@ function CustomizeSection() {
         price: magnetPrices[magnetType],
         category: "Custom Magnets",
         image: previewImages[0],
+        customImages: previewImages,
       });
     }
 
@@ -380,38 +395,38 @@ function CustomizeSection() {
   return (
     <section
       id="customize"
-      className="relative min-h-screen overflow-hidden bg-[#f8efe6] px-5 py-16 sm:px-8 lg:px-16 lg:py-24"
+      className="relative min-h-screen overflow-hidden bg-[#f8efe6] px-4 py-12 sm:px-8 lg:px-16 lg:py-24"
     >
-      <motion.img
-        src={customTabHelper}
-        alt="Memory Magnets helper"
-        initial={{ opacity: 0, x: 40, scale: 0.95 }}
-        whileInView={{ opacity: 1, x: 0, scale: 1 }}
-        transition={{ duration: 0.7 }}
-        className="pointer-events-none absolute right-5 top-16 hidden w-52 drop-shadow-2xl xl:block 2xl:w-64"
-      />
-
       <motion.h2
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
-        className="text-center text-5xl font-black text-[#1a1a1a] sm:text-6xl"
+        className="text-center text-4xl font-black text-[#1a1a1a] sm:text-6xl"
       >
         Customize Your Magnet
       </motion.h2>
 
-      <p className="mt-5 text-center text-lg text-gray-600 sm:text-xl">
+      <p className="mx-auto mt-4 max-w-[1200px] text-center text-base text-gray-600 sm:mt-5 sm:text-xl">
         Upload your favorite memory and turn it into a premium keepsake.
       </p>
 
-      <div className="mt-14 grid grid-cols-1 gap-12 lg:mt-20 lg:grid-cols-2 lg:gap-14">
+      <div className="mx-auto mt-10 grid w-full max-w-[1200px] grid-cols-1 gap-10 sm:mt-14 lg:mt-20 lg:grid-cols-2 lg:gap-14">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7 }}
-          className="rounded-[32px] bg-[#ca3a3c] p-5 text-white shadow-[0px_24px_70px_rgba(121,4,5,0.28)] sm:p-10 sm:rounded-[40px]"
+          className="relative rounded-[32px] bg-[#ca3a3c] p-5 text-white shadow-[0px_24px_70px_rgba(121,4,5,0.28)] sm:p-10 sm:rounded-[40px]"
         >
-          <h3 className="text-3xl font-bold mb-8">Create Your Magnet</h3>
+          <motion.img
+            src={customTabHelper}
+            alt="Memory Magnets helper"
+            initial={{ opacity: 0, x: 30, scale: 0.95 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+            className="pointer-events-none absolute -right-80 top-8 hidden w-44 drop-shadow-2xl xl:block 2xl:-right-90 2xl:w-52"
+          />
+
+          <h3 className="mb-6 text-2xl font-bold sm:mb-8 sm:text-3xl">Create Your Magnet</h3>
 
           <p className="mt-3 text-base text-[#ffe1dc]">
             {magnetType === "Strip Acrylic Magnet Frames"
@@ -419,7 +434,7 @@ function CustomizeSection() {
               : "Upload 1 picture for this magnet."}
           </p>
 
-          <div className="mt-7 grid gap-4 sm:grid-cols-3">
+          <div className="mt-7 grid gap-3 sm:grid-cols-3 sm:gap-4">
             {magnetTypes.map((type) => {
               const isSelected = magnetType === type;
 
@@ -428,7 +443,7 @@ function CustomizeSection() {
                   key={type}
                   type="button"
                   onClick={() => updateMagnetType(type)}
-                  className={`flex min-h-36 w-full flex-col justify-between gap-4 rounded-[24px] border px-4 py-4 text-left transition ${
+                  className={`flex min-h-28 w-full flex-col justify-between gap-3 rounded-[20px] border px-4 py-4 text-left transition sm:min-h-36 sm:gap-4 sm:rounded-[24px] ${
                     isSelected
                       ? "border-[#790405] bg-[#f8efe6] text-[#790405] shadow-lg"
                       : "border-[#ffb6b6] bg-[#ffe1dc] text-[#1a1a1a] hover:border-[#790405]"
@@ -469,14 +484,39 @@ function CustomizeSection() {
             </p>
           </div>
 
-          <input
-            key={fileInputKey}
-            type="file"
-            accept="image/*"
-            multiple={needsThreeImages}
-            onChange={handleImageChange}
-            className="mt-5 w-full rounded-2xl border border-[#ffb6b6] bg-[#f8efe6] p-5 text-[#1a1a1a]"
-          />
+          <label
+            onDragEnter={(event) => {
+              event.preventDefault();
+              setIsDraggingImage(true);
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setIsDraggingImage(true);
+            }}
+            onDragLeave={() => setIsDraggingImage(false)}
+            onDrop={handleImageDrop}
+            className={`mt-5 flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-6 text-center transition ${
+              isDraggingImage
+                ? "border-[#ffef3f] bg-[#5a0205] text-white"
+                : "border-[#ffb6b6] bg-[#f8efe6] text-[#790405]"
+            }`}
+          >
+            <ImagePlus size={34} />
+            <span className="mt-3 text-lg font-black">
+              Drag & drop {needsThreeImages ? "3 images" : "an image"} here
+            </span>
+            <span className="mt-1 text-sm font-semibold">
+              or tap to browse from your device
+            </span>
+            <input
+              key={fileInputKey}
+              type="file"
+              accept="image/*"
+              multiple={needsThreeImages}
+              onChange={handleImageChange}
+              className="sr-only"
+            />
+          </label>
 
           <input
             type="number"
@@ -486,14 +526,14 @@ function CustomizeSection() {
             onChange={(event) =>
               setQuantity(Math.max(1, Number(event.target.value) || 1))
             }
-            className="mt-5 w-full rounded-2xl border border-[#ffb6b6] bg-[#f8efe6] p-5 text-[#1a1a1a]"
+            className="mt-5 w-full rounded-2xl border border-[#ffb6b6] bg-[#f8efe6] p-4 text-[#1a1a1a] sm:p-5"
           />
 
           <button
             type="button"
             onClick={handleAddToCart}
             disabled={!hasRequiredImages}
-            className="mt-8 w-full rounded-2xl border-2 border-[#790405] bg-[#5a0205] py-5 text-xl text-white transition hover:scale-105 hover:border-[#ff9999] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
+            className="mt-8 w-full rounded-2xl border-2 border-[#790405] bg-[#5a0205] py-4 text-lg text-white transition hover:scale-105 hover:border-[#ff9999] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 sm:py-5 sm:text-xl"
           >
             Add To Cart
           </button>
@@ -513,7 +553,7 @@ function CustomizeSection() {
           <div className="flex w-full flex-col items-center gap-6">
             {renderPreview()}
             {renderAdjustmentControls()}
-            <p className="text-center text-3xl font-bold text-[#ca3a3c]">
+            <p className="text-center text-2xl font-bold text-[#ca3a3c] sm:text-3xl">
               {magnetType}
             </p>
           </div>

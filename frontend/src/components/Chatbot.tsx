@@ -65,9 +65,9 @@ function Chatbot() {
   };
 
   return (
-    <div className="fixed bottom-3 right-2 z-[9998] flex flex-col items-end gap-3">
+    <div className="fixed bottom-3 right-2 z-[9998] flex max-w-[calc(100vw-16px)] flex-col items-end gap-3 sm:bottom-3 sm:right-2">
       {isOpen && (
-        <section className="w-[440px] max-w-[calc(100vw-32px)] overflow-hidden rounded-[28px] border border-[#ce272a]/20 bg-[#f8efe6] shadow-[0px_24px_70px_rgba(121,4,5,0.25)]">
+        <section className="w-[min(440px,calc(100vw-16px))] overflow-hidden rounded-[24px] border border-[#ce272a]/20 bg-[#f8efe6] shadow-[0px_24px_70px_rgba(121,4,5,0.25)] sm:rounded-[28px]">
           <div className="flex items-center justify-between bg-[#ca3a3c] px-5 py-4 text-white">
             <div className="flex items-center gap-3">
               <img
@@ -90,7 +90,7 @@ function Chatbot() {
             </button>
           </div>
 
-          <div className="flex h-[460px] max-h-[calc(100vh-260px)] flex-col gap-3 overflow-y-auto p-4">
+          <div className="flex h-[360px] max-h-[calc(100vh-260px)] flex-col gap-3 overflow-y-auto p-4 sm:h-[460px]">
             {messages.map((message) => (
               <p
                 key={message.id}
@@ -131,16 +131,16 @@ function Chatbot() {
       <button
         type="button"
         onClick={() => setIsOpen((currentValue) => !currentValue)}
-        className="relative flex h-24 w-24 items-center justify-center rounded-full bg-[#ca3a3c] shadow-[0px_18px_50px_rgba(121,4,5,0.35)]"
+        className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[#ca3a3c] shadow-[0px_18px_50px_rgba(121,4,5,0.35)] sm:h-24 sm:w-24"
         aria-label="Open chatbot"
       >
         <img
           src={chatbotCharacter}
           alt=""
-          className="h-20 w-20 rounded-full bg-[#f8efe6] object-cover object-top"
+          className="h-14 w-14 rounded-full bg-[#f8efe6] object-cover object-top sm:h-20 sm:w-20"
         />
-        <span className="absolute -left-2 -top-2 flex h-10 w-10 items-center justify-center rounded-full bg-[#2f9f9a] text-white">
-          <MessageCircle size={20} />
+        <span className="absolute -left-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-[#2f9f9a] text-white sm:-left-2 sm:-top-2 sm:h-10 sm:w-10">
+          <MessageCircle size={18} />
         </span>
       </button>
     </div>
