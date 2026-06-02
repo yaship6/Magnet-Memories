@@ -1016,9 +1016,7 @@ app.post("/api/orders", async (request, response) => {
   const deliveryAddress = String(request.body.deliveryAddress ?? "").trim();
   const notes = String(request.body.notes ?? "").trim();
   const payment = request.body.payment ?? {};
-  const requestedPaymentMethod = String(payment.method ?? "").trim();
-  const paymentMethod =
-    requestedPaymentMethod === "phonepe" ? "manual_upi" : requestedPaymentMethod;
+  const paymentMethod = String(payment.method ?? "").trim();
   const razorpayOrderId = String(payment.razorpayOrderId ?? "").trim();
   const razorpayPaymentId = String(payment.razorpayPaymentId ?? "").trim();
   const razorpaySignature = String(payment.razorpaySignature ?? "").trim();
@@ -1085,7 +1083,6 @@ app.post("/api/orders", async (request, response) => {
       payment_method: paymentMethod,
       razorpay_order_id: razorpayOrderId || null,
       razorpay_payment_id: razorpayPaymentId || null,
-      phonepe_transaction_id: null,
       payment_verified_at: paymentMethod === "razorpay" ? now : null,
       status:
         paymentMethod === "razorpay"
