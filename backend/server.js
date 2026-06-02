@@ -1016,13 +1016,12 @@ app.post("/api/orders", async (request, response) => {
   const deliveryAddress = String(request.body.deliveryAddress ?? "").trim();
   const notes = String(request.body.notes ?? "").trim();
   const payment = request.body.payment ?? {};
-  const paymentMethod = String(payment.method ?? "").trim();
+  const requestedPaymentMethod = String(payment.method ?? "").trim();
+  const paymentMethod =
+    requestedPaymentMethod === "phonepe" ? "manual_upi" : requestedPaymentMethod;
   const razorpayOrderId = String(payment.razorpayOrderId ?? "").trim();
   const razorpayPaymentId = String(payment.razorpayPaymentId ?? "").trim();
   const razorpaySignature = String(payment.razorpaySignature ?? "").trim();
-  const phonepeTransactionId = String(
-    payment.phonepeTransactionId ?? ""
-  ).trim();
   const items = normalizeOrderItems(request.body.items);
 
   if (!customerName || !customerGmail || !customerPhone || !deliveryAddress) {
@@ -1056,15 +1055,11 @@ app.post("/api/orders", async (request, response) => {
           message: "Payment verification failed.",
         });
       }
-    } else if (paymentMethod === "phonepe") {
-      if (!phonepeTransactionId) {
-        return response.status(400).json({
-          message: "PhonePe/UPI transaction ID is required.",
-        });
-      }
+    } else if (paymentMethod === "manual_upi") {
+      // Manual UPI orders are saved after the customer scans the QR code.
     } else {
       return response.status(400).json({
-        message: "Choose Razorpay or PhonePe/UPI payment.",
+        message: "Choose Razorpay or manual UPI payment.",
       });
     }
 
@@ -1082,9 +1077,6 @@ app.post("/api/orders", async (request, response) => {
         paymentMethod ? `Payment method: ${paymentMethod}` : "",
         razorpayOrderId ? `Razorpay order: ${razorpayOrderId}` : "",
         razorpayPaymentId ? `Razorpay payment: ${razorpayPaymentId}` : "",
-        phonepeTransactionId
-          ? `PhonePe/UPI transaction: ${phonepeTransactionId}`
-          : "",
       ]
         .filter(Boolean)
         .join("\n"),
@@ -1093,7 +1085,7 @@ app.post("/api/orders", async (request, response) => {
       payment_method: paymentMethod,
       razorpay_order_id: razorpayOrderId || null,
       razorpay_payment_id: razorpayPaymentId || null,
-      phonepe_transaction_id: phonepeTransactionId || null,
+      phonepe_transaction_id: null,
       payment_verified_at: paymentMethod === "razorpay" ? now : null,
       status:
         paymentMethod === "razorpay"
