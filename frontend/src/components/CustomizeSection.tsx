@@ -395,27 +395,27 @@ function CustomizeSection() {
   return (
     <section
       id="customize"
-      className="relative min-h-screen overflow-hidden bg-[#f8efe6] px-4 py-12 sm:px-8 lg:px-16 lg:py-24"
+      className="relative min-h-screen overflow-hidden bg-[#f8efe6] px-3 py-10 sm:px-8 lg:px-16 lg:py-24"
     >
       <motion.h2
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
-        className="text-center text-4xl font-black text-[#1a1a1a] sm:text-6xl"
+        className="text-center text-3xl font-black leading-tight text-[#1a1a1a] min-[380px]:text-4xl sm:text-6xl"
       >
         Customize Your Magnet
       </motion.h2>
 
-      <p className="mx-auto mt-4 max-w-[1200px] text-center text-base text-gray-600 sm:mt-5 sm:text-xl">
+      <p className="mx-auto mt-3 max-w-[1200px] px-2 text-center text-sm leading-relaxed text-gray-600 sm:mt-5 sm:text-xl">
         Upload your favorite memory and turn it into a premium keepsake.
       </p>
 
-      <div className="mx-auto mt-10 grid w-full max-w-[1200px] grid-cols-1 gap-10 sm:mt-14 lg:mt-20 lg:grid-cols-2 lg:gap-14">
+      <div className="mx-auto mt-7 grid w-full max-w-[1200px] grid-cols-1 gap-7 sm:mt-14 lg:mt-20 lg:grid-cols-2 lg:gap-14">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7 }}
-          className="relative rounded-[32px] bg-[#ca3a3c] p-5 text-white shadow-[0px_24px_70px_rgba(121,4,5,0.28)] sm:p-10 sm:rounded-[40px]"
+          className="relative order-2 rounded-[24px] bg-[#ca3a3c] p-4 text-white shadow-[0px_18px_45px_rgba(121,4,5,0.24)] sm:p-10 sm:rounded-[40px] lg:order-none lg:shadow-[0px_24px_70px_rgba(121,4,5,0.28)]"
         >
           <motion.img
             src={customTabHelper}
@@ -426,15 +426,15 @@ function CustomizeSection() {
             className="pointer-events-none absolute -right-80 top-8 hidden w-44 drop-shadow-2xl xl:block 2xl:-right-90 2xl:w-52"
           />
 
-          <h3 className="mb-6 text-2xl font-bold sm:mb-8 sm:text-3xl">Create Your Magnet</h3>
+          <h3 className="mb-4 text-2xl font-bold sm:mb-8 sm:text-3xl">Create Your Magnet</h3>
 
-          <p className="mt-3 text-base text-[#ffe1dc]">
+          <p className="mt-2 text-sm leading-relaxed text-[#ffe1dc] sm:text-base">
             {magnetType === "Strip Acrylic Magnet Frames"
               ? "Upload exactly 3 pictures for a Strip Acrylic Magnet Frame."
               : "Upload 1 picture for this magnet."}
           </p>
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-3 sm:gap-4">
+          <div className="mt-5 grid gap-3 min-[560px]:grid-cols-3 sm:mt-7 sm:gap-4">
             {magnetTypes.map((type) => {
               const isSelected = magnetType === type;
 
@@ -443,7 +443,7 @@ function CustomizeSection() {
                   key={type}
                   type="button"
                   onClick={() => updateMagnetType(type)}
-                  className={`flex min-h-28 w-full flex-col justify-between gap-3 rounded-[20px] border px-4 py-4 text-left transition sm:min-h-36 sm:gap-4 sm:rounded-[24px] ${
+                  className={`flex min-h-20 w-full items-center justify-between gap-3 rounded-[18px] border px-4 py-3 text-left transition sm:min-h-36 sm:flex-col sm:items-stretch sm:gap-4 sm:rounded-[24px] sm:py-4 ${
                     isSelected
                       ? "border-[#790405] bg-[#f8efe6] text-[#790405] shadow-lg"
                       : "border-[#ffb6b6] bg-[#ffe1dc] text-[#1a1a1a] hover:border-[#790405]"
@@ -462,7 +462,7 @@ function CustomizeSection() {
                     </span>
                   </span>
                   <span
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center self-end rounded-full border ${
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border sm:self-end ${
                       isSelected
                         ? "border-[#790405] bg-[#ca3a3c] text-white"
                         : "border-[#790405]/30 bg-white text-transparent"
@@ -475,11 +475,11 @@ function CustomizeSection() {
             })}
           </div>
 
-          <div className="mt-5 rounded-2xl border border-[#ffb6b6] bg-[#5a0205]/35 px-5 py-4">
+          <div className="mt-4 rounded-2xl border border-[#ffb6b6] bg-[#5a0205]/35 px-4 py-3 sm:mt-5 sm:px-5 sm:py-4">
             <p className="text-sm font-semibold uppercase tracking-wide text-[#ffe1dc]">
               Selected size
             </p>
-            <p className="mt-1 text-lg font-bold text-white">
+            <p className="mt-1 text-base font-bold leading-snug text-white sm:text-lg">
               {magnetSizes[magnetType]}
             </p>
           </div>
@@ -495,14 +495,14 @@ function CustomizeSection() {
             }}
             onDragLeave={() => setIsDraggingImage(false)}
             onDrop={handleImageDrop}
-            className={`mt-5 flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-6 text-center transition ${
+            className={`mt-4 flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-4 py-5 text-center transition sm:mt-5 sm:min-h-40 sm:px-5 sm:py-6 ${
               isDraggingImage
                 ? "border-[#ffef3f] bg-[#5a0205] text-white"
                 : "border-[#ffb6b6] bg-[#f8efe6] text-[#790405]"
             }`}
           >
             <ImagePlus size={34} />
-            <span className="mt-3 text-lg font-black">
+            <span className="mt-3 text-base font-black sm:text-lg">
               Drag & drop {needsThreeImages ? "3 images" : "an image"} here
             </span>
             <span className="mt-1 text-sm font-semibold">
@@ -526,14 +526,14 @@ function CustomizeSection() {
             onChange={(event) =>
               setQuantity(Math.max(1, Number(event.target.value) || 1))
             }
-            className="mt-5 w-full rounded-2xl border border-[#ffb6b6] bg-[#f8efe6] p-4 text-[#1a1a1a] sm:p-5"
+            className="mt-4 w-full rounded-2xl border border-[#ffb6b6] bg-[#f8efe6] p-4 text-[#1a1a1a] sm:mt-5 sm:p-5"
           />
 
           <button
             type="button"
             onClick={handleAddToCart}
             disabled={!hasRequiredImages}
-            className="mt-8 w-full rounded-2xl border-2 border-[#790405] bg-[#5a0205] py-4 text-lg text-white transition hover:scale-105 hover:border-[#ff9999] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 sm:py-5 sm:text-xl"
+            className="mt-6 w-full rounded-2xl border-2 border-[#790405] bg-[#5a0205] py-4 text-lg text-white transition hover:border-[#ff9999] disabled:cursor-not-allowed disabled:opacity-60 sm:mt-8 sm:py-5 sm:text-xl lg:hover:scale-105 lg:disabled:hover:scale-100"
           >
             Add To Cart
           </button>
@@ -548,12 +548,12 @@ function CustomizeSection() {
           initial={{ opacity: 0, x: 50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7 }}
-          className="flex items-center justify-center"
+          className="order-1 flex items-center justify-center lg:order-none"
         >
-          <div className="flex w-full flex-col items-center gap-6">
+          <div className="flex w-full flex-col items-center gap-4 sm:gap-6">
             {renderPreview()}
             {renderAdjustmentControls()}
-            <p className="text-center text-2xl font-bold text-[#ca3a3c] sm:text-3xl">
+            <p className="text-center text-xl font-bold leading-tight text-[#ca3a3c] sm:text-3xl">
               {magnetType}
             </p>
           </div>

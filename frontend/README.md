@@ -29,7 +29,6 @@ This project combines luxury UI/UX, full-stack development, and AI features into
 ---
 
 ## 🗄️ Databases
-- 🍃 MongoDB
 - 🐘 PostgreSQL
 
 ---
