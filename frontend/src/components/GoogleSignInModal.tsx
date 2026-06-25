@@ -11,7 +11,7 @@ type GoogleSignInModalProps = {
 };
 
 export default function GoogleSignInModal({ isOpen, onClose, onSuccess }: GoogleSignInModalProps) {
-  const [loading, setLoading] = useState(false);
+  const loading = false;
   const [error, setError] = useState("");
 
   return (
