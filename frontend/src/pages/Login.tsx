@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useStore } from "../context/StoreContext";
 import { loginUser } from "../api/auth";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 function Login() {
   const navigate = useNavigate();
@@ -34,6 +35,11 @@ function Login() {
     }
   };
 
+  const handleGoogleSuccess = (user: any) => {
+    setAuthenticatedUser(user);
+    navigate("/shop");
+  };
+
   return (
     <div className="min-h-screen bg-[#f8efe6] text-[#1a1a1a]">
       <Navbar />
@@ -60,8 +66,16 @@ function Login() {
             />
           </label>
 
-          <label className="mt-5 flex flex-col gap-2 text-lg font-semibold">
-            Password
+          <div className="mt-5 flex flex-col gap-2">
+            <div className="flex items-center justify-between text-lg font-semibold">
+              <span>Password</span>
+              <Link
+                to="/forgot-password"
+                className="text-sm font-normal text-[#ffe1dc] hover:text-white underline transition"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <input
               required
               type="password"
@@ -70,7 +84,7 @@ function Login() {
               placeholder="Your password"
               className="rounded-2xl border border-[#ffb6b6] bg-[#f8efe6] px-5 py-4 text-[#1a1a1a] outline-none"
             />
-          </label>
+          </div>
 
           {error && <p className="mt-4 text-lg font-semibold text-[#ffe1dc]">{error}</p>}
 
@@ -80,6 +94,18 @@ function Login() {
           >
             Login
           </button>
+
+          <div className="mt-6 flex items-center justify-between gap-4">
+            <span className="h-[1px] flex-1 bg-[#ffb6b6]/40" />
+            <span className="text-sm font-semibold text-[#ffe1dc]/70">or</span>
+            <span className="h-[1px] flex-1 bg-[#ffb6b6]/40" />
+          </div>
+
+          <GoogleSignInButton
+            onSuccess={handleGoogleSuccess}
+            onError={(msg) => setError(msg)}
+          />
+
           <p className="mt-5 text-center text-base text-[#ffe1dc] sm:text-lg">
             New here?{" "}
             <Link to="/signup" className="font-bold text-white underline">

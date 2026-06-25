@@ -8,6 +8,7 @@ import OrderFeedback from "./pages/OrderFeedback";
 import SocietyStalls from "./pages/SocietyStalls";
 import MagneticCursorWaves from "./components/MagneticCursorWaves";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
 import Cart from "./pages/Cart";
 import Signup from "./pages/Signup";
 import Chatbot from "./components/Chatbot";
@@ -28,6 +29,7 @@ function App() {
         <Route path="/our-story" element={<OurStory />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />

@@ -26,7 +26,7 @@ function Navbar() {
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <nav className="relative z-50 bg-[#2f9f9a] px-4 py-1 sm:px-6 sm:py-1 lg:grid lg:min-h-12 lg:grid-cols-[220px_1fr_auto] lg:items-center lg:gap-5 lg:px-8 lg:py-0">
+    <nav className="sticky top-0 z-50 bg-[#2f9f9a] px-4 py-1 sm:px-6 sm:py-1 lg:grid lg:min-h-12 lg:grid-cols-[220px_1fr_auto] lg:items-center lg:gap-5 lg:px-8 lg:py-0">
       <div className="relative z-30 flex items-center justify-between lg:block">
         <Link
           to="/"
@@ -52,9 +52,8 @@ function Navbar() {
       </div>
 
       <div
-        className={`relative z-30 mt-4 grid gap-2 rounded-[24px] bg-[#2a8f8b] p-3 shadow-xl lg:hidden ${
-          isMenuOpen ? "grid" : "hidden"
-        }`}
+        className={`relative z-30 mt-4 grid gap-2 rounded-[24px] bg-[#2a8f8b] p-3 shadow-xl lg:hidden ${isMenuOpen ? "grid" : "hidden"
+          }`}
       >
         <Link to="/" onClick={closeMenu} className={mobileNavLinkClass}>
           Home
@@ -136,7 +135,7 @@ function Navbar() {
       </div>
 
       <div className="z-20 hidden min-w-0 flex-wrap items-center justify-end gap-2 text-white lg:col-start-3 lg:flex">
-        
+
         <Link to="/cart" className={`${navLinkClass} gap-2`}>
           <ShoppingCart size={19} />
           <span>Cart</span>

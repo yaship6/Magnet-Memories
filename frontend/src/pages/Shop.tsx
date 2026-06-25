@@ -8,9 +8,9 @@ import { useStore } from "../context/StoreContext";
 
 type Product = {
   category:
-    | "Square Photo Magnets"
-    | "Strip Acrylic Magnet Frames"
-    | "Big Acrylic Magnet Frames";
+  | "Square Photo Magnets"
+  | "Strip Acrylic Magnet Frames"
+  | "Big Acrylic Magnet Frames";
   name: string;
   price: string;
   image: string | string[];
@@ -548,15 +548,14 @@ function Shop() {
             {[0, 1, 2, 3].map((corner) => (
               <span
                 key={corner}
-                className={`absolute z-10 h-6 w-6 rounded-full bg-gradient-to-br from-white via-[#e8e4db] to-[#aaa59a] shadow ${
-                  corner === 0
+                className={`absolute z-10 h-6 w-6 rounded-full bg-gradient-to-br from-white via-[#e8e4db] to-[#aaa59a] shadow ${corner === 0
                     ? "left-2 top-2"
                     : corner === 1
-                    ? "right-2 top-2"
-                    : corner === 2
-                    ? "bottom-2 left-2"
-                    : "bottom-2 right-2"
-                }`}
+                      ? "right-2 top-2"
+                      : corner === 2
+                        ? "bottom-2 left-2"
+                        : "bottom-2 right-2"
+                  }`}
               />
             ))}
             <div className="flex h-full flex-col gap-2 rounded-[12px] bg-white p-2 shadow-[0_8px_16px_rgba(0,0,0,0.12)]">
@@ -588,15 +587,14 @@ function Shop() {
             {[0, 1, 2, 3].map((corner) => (
               <span
                 key={corner}
-                className={`absolute z-10 h-6 w-6 rounded-full bg-gradient-to-br from-white via-[#efeee9] to-[#c8c3b8] shadow ${
-                  corner === 0
+                className={`absolute z-10 h-6 w-6 rounded-full bg-gradient-to-br from-white via-[#efeee9] to-[#c8c3b8] shadow ${corner === 0
                     ? "left-2 top-2"
                     : corner === 1
-                    ? "right-2 top-2"
-                    : corner === 2
-                    ? "bottom-2 left-2"
-                    : "bottom-2 right-2"
-                }`}
+                      ? "right-2 top-2"
+                      : corner === 2
+                        ? "bottom-2 left-2"
+                        : "bottom-2 right-2"
+                  }`}
               />
             ))}
             <div className="h-full overflow-hidden rounded-[12px] bg-white p-2 shadow-[0_8px_16px_rgba(0,0,0,0.12)]">
@@ -623,11 +621,10 @@ function Shop() {
             className="h-full w-full object-cover"
           />
           <div
-            className={`pointer-events-none absolute inset-0 ${
-              product.quote
+            className={`pointer-events-none absolute inset-0 ${product.quote
                 ? "bg-gradient-to-br from-white/72 via-white/24 to-black/24"
                 : "bg-gradient-to-br from-white/38 via-transparent to-black/14"
-            }`}
+              }`}
           />
           {product.quote && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-7 text-center">
@@ -647,17 +644,16 @@ function Shop() {
 
       <main className="min-h-[105vh] px-4 py-8 sm:px-8 sm:py-10">
         <section className="mx-auto w-full max-w-[1200px]">
-          <div className="sticky top-0 z-40 -mx-4 mb-7 flex overflow-x-auto bg-[#f8efe6] px-4 py-4 text-sm font-semibold text-black [scrollbar-width:none] sm:-mx-8 sm:flex-wrap sm:justify-center sm:gap-3 sm:px-8 sm:text-base lg:gap-5 lg:text-lg">
+          <div className="sticky top-[108px] sm:top-[124px] lg:top-[116px] z-40 -mx-4 mb-7 flex flex-wrap justify-center gap-2 bg-[#f8efe6] px-4 py-4 text-sm font-semibold text-black sm:-mx-8 sm:gap-3 sm:px-8 sm:text-base lg:gap-5 lg:text-lg">
             {categories.map((category) => (
               <button
                 key={category.value}
                 type="button"
                 onClick={() => updateCategory(category.value)}
-                className={`mr-2 shrink-0 rounded-full px-4 py-2 text-center leading-tight transition sm:mr-0 ${
-                  activeCategory === category.value
+                className={`rounded-full px-4 py-2 text-center leading-tight transition ${activeCategory === category.value
                     ? "bg-[#ce272a] text-white"
                     : "bg-[#ffbcbc] text-[#790405] hover:bg-[#ce272a] hover:text-white"
-                }`}
+                  }`}
               >
                 {category.label}
               </button>
@@ -665,7 +661,7 @@ function Shop() {
             <button
               type="button"
               onClick={() => navigate("/customize")}
-              className="mr-2 inline-flex shrink-0 items-center justify-center gap-2 rounded-full border-2 border-[#790405] bg-[#ffef3f] px-4 py-2 text-center font-black leading-tight text-[#790405] shadow-[3px_3px_0px_#790405] transition hover:-translate-y-0.5 hover:bg-[#ffb43b] sm:mr-0"
+              className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#790405] bg-[#ffef3f] px-4 py-2 text-center font-black leading-tight text-[#790405] shadow-[3px_3px_0px_#790405] transition hover:-translate-y-0.5 hover:bg-[#ffb43b]"
             >
               <Sparkles size={18} />
               Customize Your Own
@@ -685,62 +681,60 @@ function Shop() {
               const isAdded = addedProductId === productId;
 
               return (
-              <article
-                key={`${product.name}-${index}`}
-                className={`group relative z-0 ${
-                  isFilteredView
-                    ? "w-full"
-                    : "mb-5 inline-block w-full break-inside-avoid"
-                }`}
-              >
-                <div className="relative overflow-hidden rounded-2xl bg-white">
-                  {renderProductPreview(product)}
-                  <div className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/20" />
-                  <button
-                    type="button"
-                    onClick={() => handleToggleWishlist(product)}
-                    className={`absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full shadow-lg transition sm:group-hover:opacity-100 ${
-                      saved
-                        ? "bg-[#e60023] text-white opacity-100"
-                        : "bg-white text-[#790405] opacity-100 sm:opacity-0"
+                <article
+                  key={`${product.name}-${index}`}
+                  className={`group relative z-0 ${isFilteredView
+                      ? "w-full"
+                      : "mb-5 inline-block w-full break-inside-avoid"
                     }`}
-                    aria-label={
-                      saved
-                        ? `Remove ${product.name} from wishlist`
-                        : `Save ${product.name} to wishlist`
-                    }
-                    title={saved ? "Saved" : "Save"}
-                  >
-                    <Bookmark size={20} fill={saved ? "currentColor" : "none"} />
-                  </button>
-                </div>
-
-                <div className="px-1 pt-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <h2 className="line-clamp-1 text-sm font-semibold text-black">
-                      {product.name}
-                    </h2>
-                  </div>
-                  <div className="mt-1 flex items-center justify-between gap-3">
-                    <p className="text-sm font-bold text-[#2f9f9a]">
-                      {product.price}
-                    </p>
+                >
+                  <div className="relative overflow-hidden rounded-2xl bg-white">
+                    {renderProductPreview(product)}
+                    <div className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/20" />
                     <button
                       type="button"
-                      onClick={() => handleAddToCart(product)}
-                      className="rounded-full bg-[#ce272a] px-3 py-1.5 text-xs font-semibold text-white"
+                      onClick={() => handleToggleWishlist(product)}
+                      className={`absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full shadow-lg transition sm:group-hover:opacity-100 ${saved
+                          ? "bg-[#e60023] text-white opacity-100"
+                          : "bg-white text-[#790405] opacity-100 sm:opacity-0"
+                        }`}
+                      aria-label={
+                        saved
+                          ? `Remove ${product.name} from wishlist`
+                          : `Save ${product.name} to wishlist`
+                      }
+                      title={saved ? "Saved" : "Save"}
                     >
-                      Add
+                      <Bookmark size={20} fill={saved ? "currentColor" : "none"} />
                     </button>
                   </div>
-                  {isAdded && (
-                    <p className="mt-1 text-xs font-black text-[#2f9f9a]">
-                      Added!
-                    </p>
-                  )}
-              
-                </div>
-              </article>
+
+                  <div className="px-1 pt-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <h2 className="line-clamp-1 text-sm font-semibold text-black">
+                        {product.name}
+                      </h2>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between gap-3">
+                      <p className="text-sm font-bold text-[#2f9f9a]">
+                        {product.price}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => handleAddToCart(product)}
+                        className="rounded-full bg-[#ce272a] px-3 py-1.5 text-xs font-semibold text-white"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    {isAdded && (
+                      <p className="mt-1 text-xs font-black text-[#2f9f9a]">
+                        Added!
+                      </p>
+                    )}
+
+                  </div>
+                </article>
               );
             })}
           </div>

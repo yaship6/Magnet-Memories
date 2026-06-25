@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { signupUser } from "../api/auth";
 import { useStore } from "../context/StoreContext";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 function Signup() {
   const navigate = useNavigate();
@@ -33,6 +34,11 @@ function Signup() {
 
       setError("Could not create account. Try again.");
     }
+  };
+
+  const handleGoogleSuccess = (user: any) => {
+    setAuthenticatedUser(user);
+    navigate("/shop");
   };
 
   return (
@@ -93,6 +99,18 @@ function Signup() {
           >
             Create Account
           </button>
+
+          <div className="mt-6 flex items-center justify-between gap-4">
+            <span className="h-[1px] flex-1 bg-[#ffb6b6]/40" />
+            <span className="text-sm font-semibold text-[#ffe1dc]/70">or</span>
+            <span className="h-[1px] flex-1 bg-[#ffb6b6]/40" />
+          </div>
+
+          <GoogleSignInButton
+            onSuccess={handleGoogleSuccess}
+            onError={(msg) => setError(msg)}
+          />
+
           <p className="mt-5 text-center text-base text-[#ffe1dc] sm:text-lg">
             Already have an account?{" "}
             <Link to="/login" className="font-bold text-white underline">

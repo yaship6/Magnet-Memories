@@ -174,16 +174,15 @@ function OrderHistory() {
                           icon: "🎉",
                         },
                       ].map((step, index) => {
-                        const statuses = [
-                          "pending",
-                          "confirmed",
-                          "processing",
-                          "shipped",
-                          "delivered",
-                        ];
-                        const currentStatusIndex = statuses.indexOf(
-                          order.status || "pending"
-                        );
+                        const getStatusIndex = (status: string | undefined) => {
+                          const norm = (status || "pending").toLowerCase().trim();
+                          if (norm.includes("deliv")) return 4;
+                          if (norm.includes("ship")) return 3;
+                          if (norm.includes("process")) return 2;
+                          if (norm.includes("confirm") || norm.includes("verify") || norm.includes("verified")) return 1;
+                          return 0;
+                        };
+                        const currentStatusIndex = getStatusIndex(order.status);
                         const stepIndex = index;
                         const isCompleted = stepIndex <= currentStatusIndex;
                         const isCurrent = stepIndex === currentStatusIndex;
