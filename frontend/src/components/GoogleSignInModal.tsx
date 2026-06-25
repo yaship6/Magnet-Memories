@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, User, ArrowLeft, Loader2 } from "lucide-react";
-import { googleLogin } from "../api/auth";
+import { X, Loader2 } from "lucide-react";
 import type { User as StoreUser } from "../context/StoreContext";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 type GoogleSignInModalProps = {
   isOpen: boolean;
@@ -10,54 +10,9 @@ type GoogleSignInModalProps = {
   onSuccess: (user: StoreUser) => void;
 };
 
-type Profile = {
-  name: string;
-  gmail: string;
-  avatarColor: string;
-};
-
-const mockProfiles: Profile[] = [
-  { name: "Yash", gmail: "yashi@gmail.com", avatarColor: "bg-blue-500" },
-  { name: "Guest User", gmail: "guest@gmail.com", avatarColor: "bg-emerald-500" },
-];
-
 export default function GoogleSignInModal({ isOpen, onClose, onSuccess }: GoogleSignInModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showCustomForm, setShowCustomForm] = useState(false);
-  const [customName, setCustomName] = useState("");
-  const [customEmail, setCustomEmail] = useState("");
-
-  const handleSelectProfile = async (profile: { name: string; gmail: string }) => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const user = await googleLogin({ credential: `mock-google-token:${profile.gmail}:${profile.name}` });
-      onSuccess(user);
-      onClose();
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Failed to sign in with Google.");
-      }
-      setLoading(false);
-    }
-  };
-
-  const handleCustomSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customName || !customEmail) {
-      setError("Please fill in both name and Gmail address.");
-      return;
-    }
-    if (!customEmail.includes("@")) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-    handleSelectProfile({ name: customName, gmail: customEmail });
-  };
 
   return (
     <AnimatePresence>
@@ -120,115 +75,28 @@ export default function GoogleSignInModal({ isOpen, onClose, onSuccess }: Google
                   </svg>
                 </div>
 
-                {!showCustomForm ? (
-                  <>
-                    <h2 className="mt-4 text-center text-xl font-bold tracking-tight text-gray-800">
-                      Choose an account
-                    </h2>
-                    <p className="mt-1 text-center text-sm text-gray-500">
-                      to continue to <span className="font-semibold text-gray-700">Memory Magnets</span>
-                    </p>
+                <h2 className="mt-4 text-center text-xl font-bold tracking-tight text-gray-800">
+                  Sign in with Google
+                </h2>
+                <p className="mt-1 text-center text-sm text-gray-500 mb-6">
+                  to continue to <span className="font-semibold text-gray-700">Memory Magnets</span>
+                </p>
 
-                    {error && (
-                      <div className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">
-                        {error}
-                      </div>
-                    )}
-
-                    {/* Account list */}
-                    <div className="mt-6 space-y-2">
-                      {mockProfiles.map((profile) => (
-                        <button
-                          key={profile.gmail}
-                          onClick={() => handleSelectProfile(profile)}
-                          className="flex w-full items-center gap-3 rounded-2xl border border-gray-200 p-3.5 text-left transition hover:bg-gray-50 active:bg-gray-100"
-                        >
-                          <div
-                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white ${profile.avatarColor}`}
-                          >
-                            {profile.name[0]}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-bold text-gray-800">{profile.name}</p>
-                            <p className="truncate text-xs text-gray-500">{profile.gmail}</p>
-                          </div>
-                        </button>
-                      ))}
-
-                      {/* Use another account button */}
-                      <button
-                        onClick={() => {
-                          setShowCustomForm(true);
-                          setError("");
-                        }}
-                        className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-gray-300 p-3.5 text-left transition hover:bg-gray-50 active:bg-gray-100"
-                      >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-500">
-                          <User size={20} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-gray-700">Use another account</p>
-                          <p className="text-xs text-gray-400">Sign in with a different Gmail address</p>
-                        </div>
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <form onSubmit={handleCustomSubmit} className="mt-4">
-                    <div className="mb-4 flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowCustomForm(false);
-                          setError("");
-                        }}
-                        className="rounded-full p-1 text-gray-500 hover:bg-gray-100"
-                      >
-                        <ArrowLeft size={18} />
-                      </button>
-                      <h2 className="text-lg font-bold text-gray-800">Add an account</h2>
-                    </div>
-
-                    {error && (
-                      <div className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">
-                        {error}
-                      </div>
-                    )}
-
-                    <div className="space-y-4">
-                      <label className="flex flex-col gap-1 text-sm font-bold text-gray-700">
-                        Full Name
-                        <input
-                          required
-                          type="text"
-                          value={customName}
-                          onChange={(e) => setCustomName(e.target.value)}
-                          placeholder="Your Name"
-                          className="rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                        />
-                      </label>
-
-                      <label className="flex flex-col gap-1 text-sm font-bold text-gray-700">
-                        Gmail Address
-                        <input
-                          required
-                          type="email"
-                          value={customEmail}
-                          onChange={(e) => setCustomEmail(e.target.value)}
-                          placeholder="yourname@gmail.com"
-                          className="rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                        />
-                      </label>
-
-                      <button
-                        type="submit"
-                        className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white transition hover:bg-blue-700 active:scale-95"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </form>
+                {error && (
+                  <div className="mt-4 mb-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">
+                    {error}
+                  </div>
                 )}
+
+                <div className="mt-6 flex justify-center w-full min-h-[50px]">
+                  <GoogleSignInButton
+                    onSuccess={(user) => {
+                      onSuccess(user);
+                      onClose();
+                    }}
+                    onError={(msg) => setError(msg)}
+                  />
+                </div>
 
                 {/* Footer disclaimer */}
                 <p className="mt-8 text-center text-xs leading-normal text-gray-400">

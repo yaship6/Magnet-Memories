@@ -51,10 +51,11 @@ export default function GoogleSignInButton({ onSuccess, onError }: GoogleSignInB
       );
     };
 
-    // Try initializing, if script is not loaded, check every 200ms
+    // Try initializing, if script is not loaded or element is not in DOM, check every 200ms
     const checkInterval = setInterval(() => {
       const g = (window as any).google;
-      if (g && g.accounts && g.accounts.id) {
+      const btn = document.getElementById("google-signin-btn");
+      if (g && g.accounts && g.accounts.id && btn) {
         clearInterval(checkInterval);
         initializeGoogleSignIn();
       }
