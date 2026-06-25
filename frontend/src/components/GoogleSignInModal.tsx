@@ -33,7 +33,7 @@ export default function GoogleSignInModal({ isOpen, onClose, onSuccess }: Google
     setError("");
 
     try {
-      const user = await googleLogin({ name: profile.name, gmail: profile.gmail });
+      const user = await googleLogin({ credential: `mock-google-token:${profile.gmail}:${profile.name}` });
       onSuccess(user);
       onClose();
     } catch (err) {
