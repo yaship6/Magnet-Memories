@@ -132,7 +132,7 @@ function SocietyStallsGallery() {
           <button
             type="button"
             onClick={showPreviousMedia}
-            className="absolute bottom-6 left-6 flex h-12 w-12 items-center justify-center rounded-full bg-white text-black shadow-xl sm:bottom-auto sm:left-8 sm:h-14 sm:w-14"
+            className="absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-black shadow-xl hover:bg-white transition sm:left-8 sm:h-14 sm:w-14"
             aria-label="Previous image"
           >
             <ChevronLeft size={32} />
@@ -156,7 +156,7 @@ function SocietyStallsGallery() {
           <button
             type="button"
             onClick={showNextMedia}
-            className="absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-full bg-white text-black shadow-xl sm:bottom-auto sm:right-8 sm:h-14 sm:w-14"
+            className="absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-black shadow-xl hover:bg-white transition sm:right-8 sm:h-14 sm:w-14"
             aria-label="Next image"
           >
             <ChevronRight size={32} />

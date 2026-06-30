@@ -543,22 +543,22 @@ function Shop() {
         : [product.image, product.image, product.image];
 
       return (
-        <div className="flex h-[300px] items-center justify-center bg-[#f6f1ec] p-4 sm:h-[420px] sm:p-5">
-          <div className="relative aspect-[3/7] h-full max-h-[280px] rounded-[20px] bg-[#d8d5cb]/60 p-3 shadow-[0_18px_35px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.8)] sm:max-h-[380px]">
+        <div className="flex h-[220px] items-center justify-center bg-[#f6f1ec] p-3 sm:h-[420px] sm:p-5">
+          <div className="relative aspect-[3/7] h-full max-h-[190px] rounded-[14px] bg-[#d8d5cb]/60 p-2 shadow-[0_12px_24px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.8)] sm:max-h-[380px] sm:rounded-[20px] sm:p-3">
             {[0, 1, 2, 3].map((corner) => (
               <span
                 key={corner}
-                className={`absolute z-10 h-6 w-6 rounded-full bg-gradient-to-br from-white via-[#e8e4db] to-[#aaa59a] shadow ${corner === 0
-                    ? "left-2 top-2"
+                className={`absolute z-10 h-4 w-4 sm:h-6 sm:w-6 rounded-full bg-gradient-to-br from-white via-[#e8e4db] to-[#aaa59a] shadow ${corner === 0
+                    ? "left-1.5 top-1.5 sm:left-2 sm:top-2"
                     : corner === 1
-                      ? "right-2 top-2"
+                      ? "right-1.5 top-1.5 sm:right-2 sm:top-2"
                       : corner === 2
-                        ? "bottom-2 left-2"
-                        : "bottom-2 right-2"
+                        ? "bottom-1.5 left-1.5 sm:bottom-2 sm:left-2"
+                        : "bottom-1.5 right-1.5 sm:bottom-2 sm:right-2"
                   }`}
               />
             ))}
-            <div className="flex h-full flex-col gap-2 rounded-[12px] bg-white p-2 shadow-[0_8px_16px_rgba(0,0,0,0.12)]">
+            <div className="flex h-full flex-col gap-1.5 sm:gap-2 rounded-[8px] sm:rounded-[12px] bg-white p-1.5 sm:p-2 shadow-[0_6px_12px_rgba(0,0,0,0.12)] sm:shadow-[0_8px_16px_rgba(0,0,0,0.12)]">
               {images.slice(0, 3).map((image, imageIndex) => (
                 <div
                   key={`${image}-${imageIndex}`}
@@ -572,7 +572,7 @@ function Shop() {
                 </div>
               ))}
             </div>
-            <div className="pointer-events-none absolute inset-0 rounded-[20px] bg-gradient-to-br from-white/35 via-transparent to-black/10" />
+            <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[20px] bg-gradient-to-br from-white/35 via-transparent to-black/10" />
           </div>
         </div>
       );
@@ -582,29 +582,29 @@ function Shop() {
       const image = Array.isArray(product.image) ? product.image[0] : product.image;
 
       return (
-        <div className="flex h-[300px] items-center justify-center bg-[#f6f1ec] p-4 sm:h-[420px] sm:p-5">
-          <div className="relative aspect-[3/4] h-full max-h-[280px] rounded-[22px] bg-[#e8e8e3]/65 p-4 shadow-[0_18px_36px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.85)] sm:max-h-[380px]">
+        <div className="flex h-[220px] items-center justify-center bg-[#f6f1ec] p-3 sm:h-[420px] sm:p-5">
+          <div className="relative aspect-[3/4] h-full max-h-[190px] rounded-[16px] bg-[#e8e8e3]/65 p-3 shadow-[0_12px_24px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.85)] sm:max-h-[380px] sm:rounded-[22px] sm:p-4">
             {[0, 1, 2, 3].map((corner) => (
               <span
                 key={corner}
-                className={`absolute z-10 h-6 w-6 rounded-full bg-gradient-to-br from-white via-[#efeee9] to-[#c8c3b8] shadow ${corner === 0
-                    ? "left-2 top-2"
+                className={`absolute z-10 h-4 w-4 sm:h-6 sm:w-6 rounded-full bg-gradient-to-br from-white via-[#efeee9] to-[#c8c3b8] shadow ${corner === 0
+                    ? "left-1.5 top-1.5 sm:left-2 sm:top-2"
                     : corner === 1
-                      ? "right-2 top-2"
+                      ? "right-1.5 top-1.5 sm:right-2 sm:top-2"
                       : corner === 2
-                        ? "bottom-2 left-2"
-                        : "bottom-2 right-2"
+                        ? "bottom-1.5 left-1.5 sm:bottom-2 sm:left-2"
+                        : "bottom-1.5 right-1.5 sm:bottom-2 sm:right-2"
                   }`}
               />
             ))}
-            <div className="h-full overflow-hidden rounded-[12px] bg-white p-2 shadow-[0_8px_16px_rgba(0,0,0,0.12)]">
+            <div className="h-full overflow-hidden rounded-[8px] sm:rounded-[12px] bg-white p-1.5 sm:p-2 shadow-[0_6px_12px_rgba(0,0,0,0.12)] sm:shadow-[0_8px_16px_rgba(0,0,0,0.12)]">
               <img
                 src={image}
                 alt={product.name}
                 className="h-full w-full object-cover"
               />
             </div>
-            <div className="pointer-events-none absolute inset-0 rounded-[22px] bg-gradient-to-br from-white/35 via-transparent to-black/10" />
+            <div className="pointer-events-none absolute inset-0 rounded-[16px] sm:rounded-[22px] bg-gradient-to-br from-white/35 via-transparent to-black/10" />
           </div>
         </div>
       );
@@ -613,8 +613,8 @@ function Shop() {
     const image = Array.isArray(product.image) ? product.image[0] : product.image;
 
     return (
-      <div className="flex aspect-square items-center justify-center bg-[#f6f1ec] p-4 sm:p-5">
-        <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-[26px] bg-[#f1f1f1] shadow-[0_18px_34px_rgba(0,0,0,0.2),inset_0_8px_12px_rgba(255,255,255,0.68),inset_0_-12px_18px_rgba(0,0,0,0.12)] sm:max-w-[330px] sm:rounded-[34px]">
+      <div className="flex aspect-square items-center justify-center bg-[#f6f1ec] p-3 sm:p-5">
+        <div className="relative aspect-square w-full max-w-[240px] overflow-hidden rounded-[20px] bg-[#f1f1f1] shadow-[0_12px_24px_rgba(0,0,0,0.2),inset_0_6px_10px_rgba(255,255,255,0.68),inset_0_-10px_14px_rgba(0,0,0,0.12)] sm:max-w-[330px] sm:rounded-[34px] sm:shadow-[0_18px_34px_rgba(0,0,0,0.2),inset_0_8px_12px_rgba(255,255,255,0.68),inset_0_-12px_18px_rgba(0,0,0,0.12)]">
           <img
             src={image}
             alt={product.name}
@@ -627,8 +627,8 @@ function Shop() {
               }`}
           />
           {product.quote && (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-7 text-center">
-              <p className="rounded-2xl bg-white/72 px-5 py-4 text-2xl font-black leading-tight text-[#790405] shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-sm">
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-3 sm:p-7 text-center">
+              <p className="rounded-xl sm:rounded-2xl bg-white/72 px-3 py-2 sm:px-5 sm:py-4 text-sm sm:text-2xl font-black leading-tight text-[#790405] shadow-[0_6px_16px_rgba(0,0,0,0.16)] sm:shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-sm">
                 {product.quote}
               </p>
             </div>
@@ -671,8 +671,8 @@ function Shop() {
           <div
             className={
               isFilteredView
-                ? "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
-                : "columns-1 gap-4 sm:columns-2 lg:columns-4"
+                ? "grid grid-cols-2 gap-3 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3"
+                : "columns-2 gap-3 sm:gap-4 sm:columns-2 lg:columns-4"
             }
           >
             {visibleProducts.map((product, index) => {
@@ -685,16 +685,16 @@ function Shop() {
                   key={`${product.name}-${index}`}
                   className={`group relative z-0 ${isFilteredView
                       ? "w-full"
-                      : "mb-5 inline-block w-full break-inside-avoid"
+                      : "mb-3 sm:mb-5 inline-block w-full break-inside-avoid"
                     }`}
                 >
-                  <div className="relative overflow-hidden rounded-2xl bg-white">
+                  <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-white">
                     {renderProductPreview(product)}
                     <div className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/20" />
                     <button
                       type="button"
                       onClick={() => handleToggleWishlist(product)}
-                      className={`absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full shadow-lg transition sm:group-hover:opacity-100 ${saved
+                      className={`absolute right-2 top-2 sm:right-3 sm:top-3 z-20 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full shadow-lg transition sm:group-hover:opacity-100 ${saved
                           ? "bg-[#e60023] text-white opacity-100"
                           : "bg-white text-[#790405] opacity-100 sm:opacity-0"
                         }`}
@@ -705,30 +705,30 @@ function Shop() {
                       }
                       title={saved ? "Saved" : "Save"}
                     >
-                      <Bookmark size={20} fill={saved ? "currentColor" : "none"} />
+                      <Bookmark className="h-4 w-4 sm:h-5 sm:w-5" fill={saved ? "currentColor" : "none"} />
                     </button>
                   </div>
 
-                  <div className="px-1 pt-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <h2 className="line-clamp-1 text-sm font-semibold text-black">
+                  <div className="px-1 pt-1.5 sm:pt-2">
+                    <div className="flex items-start justify-between gap-1.5 sm:gap-2">
+                      <h2 className="line-clamp-1 text-xs sm:text-sm font-semibold text-black">
                         {product.name}
                       </h2>
                     </div>
-                    <div className="mt-1 flex items-center justify-between gap-3">
-                      <p className="text-sm font-bold text-[#2f9f9a]">
+                    <div className="mt-0.5 sm:mt-1 flex items-center justify-between gap-2 sm:gap-3">
+                      <p className="text-xs sm:text-sm font-bold text-[#2f9f9a]">
                         {product.price}
                       </p>
                       <button
                         type="button"
                         onClick={() => handleAddToCart(product)}
-                        className="rounded-full bg-[#ce272a] px-3 py-1.5 text-xs font-semibold text-white"
+                        className="rounded-full bg-[#ce272a] px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-white"
                       >
                         Add
                       </button>
                     </div>
                     {isAdded && (
-                      <p className="mt-1 text-xs font-black text-[#2f9f9a]">
+                      <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-black text-[#2f9f9a]">
                         Added!
                       </p>
                     )}

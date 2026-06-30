@@ -52,7 +52,7 @@ function Navbar() {
       </div>
 
       <div
-        className={`relative z-30 mt-4 grid gap-2 rounded-[24px] bg-[#2a8f8b] p-3 shadow-xl lg:hidden ${isMenuOpen ? "grid" : "hidden"
+        className={`relative z-30 mt-4 max-h-[calc(100vh-110px)] overflow-y-auto grid gap-2 rounded-[24px] bg-[#2a8f8b] p-3 shadow-xl lg:hidden ${isMenuOpen ? "grid" : "hidden"
           }`}
       >
         <Link to="/" onClick={closeMenu} className={mobileNavLinkClass}>

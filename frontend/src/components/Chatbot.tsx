@@ -128,21 +128,23 @@ function Chatbot() {
         </section>
       )}
 
-      <button
-        type="button"
-        onClick={() => setIsOpen((currentValue) => !currentValue)}
-        className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[#ca3a3c] shadow-[0px_18px_50px_rgba(121,4,5,0.35)] sm:h-24 sm:w-24"
-        aria-label="Open chatbot"
-      >
-        <img
-          src={chatbotCharacter}
-          alt=""
-          className="h-14 w-14 rounded-full bg-[#f8efe6] object-cover object-top sm:h-20 sm:w-20"
-        />
-        <span className="absolute -left-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-[#2f9f9a] text-white sm:-left-2 sm:-top-2 sm:h-10 sm:w-10">
-          <MessageCircle size={18} />
-        </span>
-      </button>
+      {!isOpen && (
+        <button
+          type="button"
+          onClick={() => setIsOpen((currentValue) => !currentValue)}
+          className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[#ca3a3c] shadow-[0px_18px_50px_rgba(121,4,5,0.35)] sm:h-24 sm:w-24"
+          aria-label="Open chatbot"
+        >
+          <img
+            src={chatbotCharacter}
+            alt=""
+            className="h-14 w-14 rounded-full bg-[#f8efe6] object-cover object-top sm:h-20 sm:w-20"
+          />
+          <span className="absolute -left-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-[#2f9f9a] text-white sm:-left-2 sm:-top-2 sm:h-10 sm:w-10">
+            <MessageCircle size={18} />
+          </span>
+        </button>
+      )}
     </div>
   );
 }
