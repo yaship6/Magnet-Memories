@@ -502,6 +502,7 @@ function Shop() {
     price: product.price,
     category: product.category,
     image: Array.isArray(product.image) ? product.image[0] : product.image,
+    customImages: Array.isArray(product.image) ? product.image : [product.image],
   });
 
   const handleAddToCart = (product: Product) => {

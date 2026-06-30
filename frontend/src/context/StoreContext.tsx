@@ -74,14 +74,13 @@ function readStoredCart(user: User | null) {
     return [];
   }
 
-  const storedCart = window.localStorage.getItem(getCartKey(user.email));
-
-  if (!storedCart) {
-    return [];
-  }
-
   try {
-    return JSON.parse(storedCart) as CartItem[];
+    const storedCart = window.localStorage.getItem(getCartKey(user.email));
+    if (!storedCart) {
+      return [];
+    }
+    const parsed = JSON.parse(storedCart);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -92,14 +91,13 @@ function readStoredWishlist(user: User | null) {
     return [];
   }
 
-  const storedWishlist = window.localStorage.getItem(getWishlistKey(user.email));
-
-  if (!storedWishlist) {
-    return [];
-  }
-
   try {
-    return JSON.parse(storedWishlist) as WishlistItem[];
+    const storedWishlist = window.localStorage.getItem(getWishlistKey(user.email));
+    if (!storedWishlist) {
+      return [];
+    }
+    const parsed = JSON.parse(storedWishlist);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -119,7 +117,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    window.localStorage.setItem(getCartKey(user.email), JSON.stringify(cartItems));
+    try {
+      window.localStorage.setItem(getCartKey(user.email), JSON.stringify(cartItems));
+    } catch (e) {
+      console.error("Failed to save cart to localStorage:", e);
+    }
   }, [cartItems, user]);
 
   useEffect(() => {
@@ -127,10 +129,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    window.localStorage.setItem(
-      getWishlistKey(user.email),
-      JSON.stringify(wishlistItems)
-    );
+    try {
+      window.localStorage.setItem(
+        getWishlistKey(user.email),
+        JSON.stringify(wishlistItems)
+      );
+    } catch (e) {
+      console.error("Failed to save wishlist to localStorage:", e);
+    }
   }, [wishlistItems, user]);
 
   const setAuthenticatedUser = (nextUser: User) => {
@@ -146,7 +152,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       phone: String(nextUser.phone ?? "").trim(),
     };
 
-    window.localStorage.setItem(currentUserKey, JSON.stringify(normalizedUser));
+    try {
+      window.localStorage.setItem(currentUserKey, JSON.stringify(normalizedUser));
+    } catch (e) {
+      console.error("Failed to save user to localStorage:", e);
+    }
     setUser(normalizedUser);
     setCartItems(readStoredCart(normalizedUser));
     setWishlistItems(readStoredWishlist(normalizedUser));
@@ -165,20 +175,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       phone: String(nextUser.phone ?? "").trim(),
     };
 
-    if (user?.email && user.email !== normalizedUser.email) {
-      window.localStorage.removeItem(getCartKey(user.email));
-      window.localStorage.removeItem(getWishlistKey(user.email));
-    }
+    try {
+      if (user?.email && user.email !== normalizedUser.email) {
+        window.localStorage.removeItem(getCartKey(user.email));
+        window.localStorage.removeItem(getWishlistKey(user.email));
+      }
 
-    window.localStorage.setItem(currentUserKey, JSON.stringify(normalizedUser));
-    window.localStorage.setItem(
-      getCartKey(normalizedUser.email),
-      JSON.stringify(cartItems)
-    );
-    window.localStorage.setItem(
-      getWishlistKey(normalizedUser.email),
-      JSON.stringify(wishlistItems)
-    );
+      window.localStorage.setItem(currentUserKey, JSON.stringify(normalizedUser));
+      window.localStorage.setItem(
+        getCartKey(normalizedUser.email),
+        JSON.stringify(cartItems)
+      );
+      window.localStorage.setItem(
+        getWishlistKey(normalizedUser.email),
+        JSON.stringify(wishlistItems)
+      );
+    } catch (e) {
+      console.error("Failed to update user/cart/wishlist in localStorage:", e);
+    }
     setUser(normalizedUser);
   };
 

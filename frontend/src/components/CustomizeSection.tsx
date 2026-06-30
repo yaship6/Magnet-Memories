@@ -3,6 +3,7 @@ import { Check, ImagePlus, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../context/StoreContext";
+import { compressImage } from "../utils/image";
 import customTabHelper from "../assets/custom-tab-helper-transparent.png";
 
 type MagnetType =
@@ -68,7 +69,11 @@ function CustomizeSection() {
       (file) =>
         new Promise<string>((resolve) => {
           const reader = new FileReader();
-          reader.onload = () => resolve(String(reader.result));
+          reader.onload = async () => {
+            const rawBase64 = String(reader.result);
+            const compressed = await compressImage(rawBase64);
+            resolve(compressed);
+          };
           reader.readAsDataURL(file);
         })
     );

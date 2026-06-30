@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useStore } from "../context/StoreContext";
 import paymentQr from "../../qr.jpeg";
+import { compressImage } from "../utils/image";
 
 const getPriceNumber = (price: string) => Number(price.replace(/[^0-9]/g, ""));
 
@@ -40,8 +41,10 @@ function Cart() {
     if (!file) return;
     setScreenshotName(file.name);
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setScreenshot(reader.result as string);
+    reader.onloadend = async () => {
+      const rawBase64 = reader.result as string;
+      const compressed = await compressImage(rawBase64);
+      setScreenshot(compressed);
     };
     reader.readAsDataURL(file);
   };
