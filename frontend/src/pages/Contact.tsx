@@ -15,7 +15,6 @@ import {
 import { FaInstagram } from "react-icons/fa";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import { createContactMessage } from "../api/contact";
 import founderImage from "../../WhatsApp Image 2026-05-28 at 18.37.14.jpeg";
 
 const phoneNumber = "+91 70427 36597";
@@ -62,30 +61,41 @@ function Contact() {
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitMessage("");
     setSubmitError("");
     setIsSubmitting(true);
 
     try {
-      await createContactMessage({
-        name,
-        phone,
-        requestType,
-        message,
-      });
+      const cleanPhone = phone.trim();
+      const formattedText = `Hi Magnet Memories! 💙
 
+My Details:
+* Name: ${name}
+* Phone: ${cleanPhone}
+* Request: ${requestType}
+
+Message:
+${message}`;
+
+      const encodedText = encodeURIComponent(formattedText);
+      const whatsappLink = `https://wa.me/917042736597?text=${encodedText}`;
+
+      // Open the WhatsApp pre-filled chat in a new tab
+      window.open(whatsappLink, "_blank");
+
+      // Reset form fields
       setName("");
       setPhone("");
       setRequestType("Custom order");
       setMessage("");
-      setSubmitMessage("Message saved. We will get back to you soon.");
+      setSubmitMessage("Redirecting to WhatsApp to send your message...");
     } catch (error) {
       setSubmitError(
         error instanceof Error
           ? error.message
-          : "Could not submit contact message."
+          : "Could not redirect to WhatsApp."
       );
     } finally {
       setIsSubmitting(false);

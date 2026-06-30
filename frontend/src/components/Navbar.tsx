@@ -5,6 +5,7 @@ import {
   LogOut,
   Menu,
   ShoppingCart,
+  Shield,
   UserRound,
   X,
 } from "lucide-react";
@@ -17,6 +18,12 @@ function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cartCount, logout, user, wishlistCount } = useStore();
   const userDisplayName = user?.name ?? user?.gmail ?? user?.email ?? "Account";
+
+  const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL ?? "magnetmemories2210@gmail.com";
+  const isAdmin = user && (
+    user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+    user.gmail?.toLowerCase() === ADMIN_EMAIL.toLowerCase()
+  );
   const navLinkClass =
     "flex min-h-10 items-center justify-center rounded-full border-2 border-[#790405] bg-[#ca3a3c] px-3 py-2 text-center text-sm font-semibold leading-none text-white transition-all duration-300 hover:border-[#ff9999] hover:bg-[#5a0205] sm:px-4 sm:text-base";
   const mobileNavLinkClass =
@@ -79,6 +86,11 @@ function Navbar() {
         </Link>
         {user ? (
           <>
+            {isAdmin && (
+              <Link to="/admin" onClick={closeMenu} className={mobileNavLinkClass}>
+                Admin Dashboard
+              </Link>
+            )}
             <Link
               to="/profile-edit"
               onClick={closeMenu}
@@ -164,6 +176,16 @@ function Navbar() {
               className="invisible absolute right-0 top-[calc(100%+10px)] z-50 w-64 rounded-[24px] border-2 border-[#790405] bg-[#fffaf7] p-3 text-[#790405] opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
               role="menu"
             >
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className={accountMenuItemClass}
+                  role="menuitem"
+                >
+                  <Shield size={20} />
+                  Admin Dashboard
+                </Link>
+              )}
               <Link
                 to="/profile-edit"
                 className={accountMenuItemClass}

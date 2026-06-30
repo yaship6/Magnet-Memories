@@ -16,6 +16,7 @@ import ReturnsExchanges from "./pages/ReturnsExchanges";
 import OrderHistory from "./pages/OrderHistory";
 import Wishlist from "./pages/Wishlist";
 import ProfileEdit from "./pages/ProfileEdit";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         <Route path="/order-feedback" element={<OrderFeedback />} />
         <Route path="/society-stalls" element={<SocietyStalls />} />
         <Route path="/returns-exchanges" element={<ReturnsExchanges />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </>
   );

@@ -1,11 +1,9 @@
 import { Link } from "react-router-dom";
-import { CreditCard, Minus, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { CreditCard, Minus, Plus, Clock, Trash2 } from "lucide-react";
 import { useState } from "react";
 import {
   createOrder,
-  createRazorpayOrder,
   type OrderResponse,
-  type RazorpayPaymentResponse,
 } from "../api/orders";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
@@ -14,124 +12,38 @@ import paymentQr from "../../qr.jpeg";
 
 const getPriceNumber = (price: string) => Number(price.replace(/[^0-9]/g, ""));
 
-declare global {
-  interface Window {
-    Razorpay?: new (options: RazorpayCheckoutOptions) => {
-      open: () => void;
-      on: (event: "payment.failed", handler: (response: unknown) => void) => void;
-    };
-  }
-}
-
-type RazorpayCheckoutOptions = {
-  key: string;
-  amount: number;
-  currency: string;
-  name: string;
-  description: string;
-  order_id: string;
-  prefill: {
-    name: string;
-    email: string;
-    contact: string;
-  };
-  notes: Record<string, string>;
-  theme: {
-    color: string;
-  };
-  handler: (response: RazorpayPaymentResponse) => void;
-  modal: {
-    ondismiss: () => void;
-  };
-};
-
-function loadRazorpayCheckoutScript() {
-  return new Promise<void>((resolve, reject) => {
-    if (window.Razorpay) {
-      resolve();
-      return;
-    }
-
-    const existingScript = document.querySelector<HTMLScriptElement>(
-      'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
-    );
-
-    if (existingScript) {
-      existingScript.addEventListener("load", () => resolve(), { once: true });
-      existingScript.addEventListener(
-        "error",
-        () => reject(new Error("Could not load Razorpay Checkout.")),
-        { once: true }
-      );
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () =>
-      reject(new Error("Could not load Razorpay Checkout."));
-    document.body.appendChild(script);
-  });
-}
-
 function Cart() {
   const { user, cartItems, clearCart, removeFromCart, updateQuantity } =
     useStore();
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [notes, setNotes] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<
-    "razorpay" | "manual_upi"
-  >("razorpay");
+  const [transactionId, setTransactionId] = useState("");
+  const [screenshot, setScreenshot] = useState<string | null>(null);
+  const [screenshotName, setScreenshotName] = useState("");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-  const [isPaymentVerified, setIsPaymentVerified] = useState(false);
   const [orderMessage, setOrderMessage] = useState("");
   const [orderError, setOrderError] = useState("");
   const [placedOrder, setPlacedOrder] =
     useState<OrderResponse["order"] | null>(null);
   const [confirmationEmailSent, setConfirmationEmailSent] = useState(false);
   const [confirmationEmailMessage, setConfirmationEmailMessage] = useState("");
+
   const total = cartItems.reduce(
     (sum, item) => sum + getPriceNumber(item.price) * item.quantity,
     0
   );
   const customerDisplayName = user?.name ?? user?.gmail ?? user?.email ?? "";
 
-  const savePaidOrder = async (payment: {
-    method: "razorpay" | "manual_upi";
-    razorpayOrderId?: string;
-    razorpayPaymentId?: string;
-    razorpaySignature?: string;
-  }) => {
-    if (!user) {
-      throw new Error("Login is required to place your order.");
-    }
-
-      const orderResponse = await createOrder({
-        customer: { ...user, name: customerDisplayName, phone },
-        deliveryAddress,
-        notes,
-        items: cartItems,
-        payment,
-      });
-      const { order, emailSent, emailMessage } = orderResponse;
-
-      clearCart();
-      setPhone("");
-      setDeliveryAddress("");
-      setNotes("");
-      setIsPaymentVerified(payment.method === "razorpay");
-      setPlacedOrder(order);
-      setConfirmationEmailSent(emailSent);
-      setConfirmationEmailMessage(emailMessage);
-      setOrderMessage(
-        payment.method === "razorpay"
-          ? `Payment verified and order placed. Order ID: ${order.id.slice(0, 8)}`
-          : `Manual UPI payment noted and order placed. Order ID: ${order.id.slice(0, 8)}`
-      );
-      window.scrollTo(0, 0);
+  const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setScreenshotName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setScreenshot(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handlePlaceOrder = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -141,8 +53,21 @@ function Cart() {
       return;
     }
 
+    const cleanTx = transactionId.trim();
+    const hasTxId = cleanTx.length > 0;
+    const isValidTx = /^\d{12}$/.test(cleanTx);
+
+    if (hasTxId && !isValidTx) {
+      setOrderError("UPI Transaction ID must be exactly 12 digits.");
+      return;
+    }
+
+    if (!hasTxId && !screenshot) {
+      setOrderError("Please enter a 12-digit UTR/Transaction ID OR upload a Payment Screenshot.");
+      return;
+    }
+
     setIsPlacingOrder(true);
-    setIsPaymentVerified(false);
     setOrderMessage("");
     setOrderError("");
     setPlacedOrder(null);
@@ -150,82 +75,38 @@ function Cart() {
     setConfirmationEmailMessage("");
 
     try {
-      if (paymentMethod === "manual_upi") {
-        await savePaidOrder({
+      const orderResponse = await createOrder({
+        customer: { ...user, name: customerDisplayName, phone },
+        deliveryAddress,
+        notes,
+        items: cartItems,
+        payment: {
           method: "manual_upi",
-        });
-        return;
-      }
-
-      await loadRazorpayCheckoutScript();
-      const razorpayOrder = await createRazorpayOrder({
-        amount: total,
-        receipt: `mm-${Date.now()}`,
-        notes: {
-          customer: customerDisplayName,
-          email: user.email,
-        },
+          transactionId: cleanTx || undefined,
+          screenshot: screenshot || undefined,
+        } as any,
       });
+      const { order, emailSent, emailMessage } = orderResponse;
 
-      if (!window.Razorpay) {
-        throw new Error("Razorpay Checkout could not be opened.");
-      }
-
-      const checkout = new window.Razorpay({
-        key: razorpayOrder.keyId,
-        amount: razorpayOrder.order.amount,
-        currency: razorpayOrder.order.currency,
-        name: "The Memory Magnets",
-        description: "Memory Magnets order payment",
-        order_id: razorpayOrder.order.id,
-        prefill: {
-          name: customerDisplayName,
-          email: user.email,
-          contact: phone,
-        },
-        notes: {
-          deliveryAddress,
-        },
-        theme: {
-          color: "#ca3a3c",
-        },
-        handler: async (response) => {
-          try {
-            await savePaidOrder({
-              method: "razorpay",
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            });
-          } catch (error) {
-            setOrderError(
-              error instanceof Error
-                ? error.message
-                : "Payment was received but verification failed."
-            );
-          } finally {
-            setIsPlacingOrder(false);
-          }
-        },
-        modal: {
-          ondismiss: () => {
-            setIsPlacingOrder(false);
-            setOrderError("Payment was cancelled.");
-          },
-        },
-      });
-
-      checkout.on("payment.failed", () => {
-        setIsPlacingOrder(false);
-        setOrderError("Payment failed. Please try again.");
-      });
-      checkout.open();
+      clearCart();
+      setPhone("");
+      setDeliveryAddress("");
+      setNotes("");
+      setTransactionId("");
+      setScreenshot(null);
+      setScreenshotName("");
+      setPlacedOrder(order);
+      setConfirmationEmailSent(emailSent);
+      setConfirmationEmailMessage(emailMessage);
+      setOrderMessage(`Order placed successfully! Order ID: ${order.id.slice(0, 8)}`);
+      window.scrollTo(0, 0);
     } catch (error) {
       setOrderError(
         error instanceof Error
           ? error.message
-          : "Could not start payment. Please check details and try again."
+          : "Could not place order. Please check details and try again."
       );
+    } finally {
       setIsPlacingOrder(false);
     }
   };
@@ -339,76 +220,65 @@ function Cart() {
                 <p className="text-xl font-black sm:text-2xl">Total: Rs. {total}</p>
               </div>
 
+              {/* Payment Verification Section */}
               <div className="grid gap-6 rounded-[24px] bg-[#fffaf7] p-5 shadow-xl sm:rounded-[28px] sm:p-8">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-3">
                     <CreditCard className="text-[#2f9f9a]" size={30} />
                     <h2 className="text-2xl font-black text-[#ce272a] sm:text-3xl">
-                      Secure Payment
+                      Payment Verification
                     </h2>
                   </div>
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("razorpay")}
-                      className={`rounded-2xl border-2 px-5 py-4 text-left transition ${
-                        paymentMethod === "razorpay"
-                          ? "border-[#790405] bg-[#ca3a3c] text-white"
-                          : "border-[#ffb6b6] bg-[#f8efe6] text-[#790405]"
-                      }`}
-                    >
-                      <span className="block text-lg font-black">Razorpay</span>
-                      <span className="mt-1 block text-sm font-semibold">
-                        Card, UPI, wallet, and verified confirmation
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("manual_upi")}
-                      className={`rounded-2xl border-2 px-5 py-4 text-left transition ${
-                        paymentMethod === "manual_upi"
-                          ? "border-[#790405] bg-[#ca3a3c] text-white"
-                          : "border-[#ffb6b6] bg-[#f8efe6] text-[#790405]"
-                      }`}
-                    >
-                      <span className="block text-lg font-black">
-                        Manual UPI
-                      </span>
-                      <span className="mt-1 block text-sm font-semibold">
-                        Scan QR and place your order
-                      </span>
-                    </button>
+                  
+                  <div className="mt-6 grid gap-5 sm:grid-cols-[180px_1fr] sm:items-center">
+                    <img
+                      src={paymentQr}
+                      alt="UPI payment QR code"
+                      className="mx-auto h-44 w-44 rounded-2xl border border-[#ffb6b6] bg-white object-contain p-3 sm:mx-0"
+                    />
+                    <div>
+                      <p className="text-base text-gray-700 sm:text-lg">
+                        Please pay <span className="font-black text-[#ce272a]">Rs. {total}</span> using any UPI app by scanning the QR code or sending directly to the UPI address below.
+                      </p>
+                      <p className="mt-3 break-all text-2xl font-black text-[#790405]">
+                        yashihihi@ibl
+                      </p>
+                    </div>
                   </div>
 
-                  {paymentMethod === "razorpay" ? (
-                    <>
-                      <p className="mt-4 text-base text-gray-700 sm:text-lg">
-                        Pay Rs. {total} with Razorpay. Your order is saved only
-                        after Razorpay payment signature verification succeeds.
-                      </p>
-                      <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#ffbcbc] px-4 py-2 text-sm font-bold text-[#790405]">
-                        <ShieldCheck size={17} />
-                        Payment confirmation enabled
-                      </p>
-                    </>
-                  ) : (
-                    <div className="mt-5 grid gap-5 sm:grid-cols-[180px_1fr] sm:items-center">
-                      <img
-                        src={paymentQr}
-                        alt="Manual UPI payment QR code"
-                        className="mx-auto h-44 w-44 rounded-2xl border border-[#ffb6b6] bg-white object-contain p-3 sm:mx-0"
-                      />
-                      <div>
-                        <p className="text-base text-gray-700 sm:text-lg">
-                          Pay Rs. {total} using any UPI app, then place your
-                          order.
-                        </p>
-                        <p className="mt-3 break-all text-xl font-black text-[#790405]">
-                          yashihihi@ibl
-                        </p>
+                  <div className="mt-6 border-t border-[#ffb6b6]/30 pt-6 grid gap-5 sm:grid-cols-2">
+                    <label className="grid gap-2 text-lg font-semibold text-[#790405]">
+                      <div className="flex flex-wrap justify-between items-baseline">
+                        <span>12-Digit Transaction ID (UTR) <span className="text-[#ce272a]">*</span></span>
+                        <span className="text-xs font-normal text-gray-500">(Required if no screenshot)</span>
                       </div>
-                    </div>
-                  )}
+                      <input
+                        type="text"
+                        placeholder="Enter 12-digit UTR"
+                        value={transactionId}
+                        onChange={(e) => setTransactionId(e.target.value.replace(/\D/g, "").slice(0, 12))}
+                        className="rounded-2xl border border-[#ffb6b6] bg-white px-5 py-4 text-[#1a1a1a] outline-none focus:border-[#ce272a]"
+                      />
+                    </label>
+
+                    <label className="grid gap-2 text-lg font-semibold text-[#790405]">
+                      <div className="flex flex-wrap justify-between items-baseline">
+                        <span>Upload Payment Screenshot <span className="text-[#ce272a]">*</span></span>
+                        <span className="text-xs font-normal text-gray-500">(Required if no UTR)</span>
+                      </div>
+                      <div className="relative flex items-center justify-center rounded-2xl border-2 border-dashed border-[#ffb6b6] bg-white px-5 py-4 text-center cursor-pointer hover:border-[#ce272a]">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleScreenshotChange}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <span className="text-sm font-bold text-gray-500 truncate px-2">
+                          {screenshotName ? `✓ ${screenshotName}` : "Click to select screenshot"}
+                        </span>
+                      </div>
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -477,13 +347,7 @@ function Cart() {
                     disabled={isPlacingOrder}
                     className="rounded-2xl border-2 border-[#790405] bg-[#5a0205] py-4 text-lg font-semibold text-white transition hover:scale-[1.02] hover:border-[#ff9999] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 sm:py-5 sm:text-xl"
                   >
-                    {isPlacingOrder
-                      ? paymentMethod === "razorpay"
-                        ? "Opening Razorpay..."
-                        : "Placing Order..."
-                      : paymentMethod === "razorpay"
-                      ? `Pay Rs. ${total} & Place Order`
-                      : "Place Order with Manual UPI"}
+                    {isPlacingOrder ? "Placing Order..." : "Confirm & Place Order"}
                   </button>
 
                   {orderMessage && (
@@ -561,16 +425,14 @@ function Cart() {
               <div className="mt-6 grid gap-5 rounded-2xl bg-[#ffbcbc] p-5">
                 <div className="min-w-0">
                   <h3 className="text-2xl font-black text-[#790405]">
-                    Payment
+                    Payment Status
                   </h3>
                   <p className="mt-2 text-lg text-gray-700">
-                    {isPaymentVerified
-                      ? "Razorpay payment was verified before saving this order."
-                      : "Manual UPI payment details are attached to this order."}
+                    Your UPI payment verification is pending manual review by the admin.
                   </p>
-                  <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-base font-black text-[#2f9f9a]">
-                    <ShieldCheck size={18} />
-                    Confirmed
+                  <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-base font-black text-[#d97706]">
+                    <Clock size={18} />
+                    Pending Verification
                   </p>
                 </div>
               </div>

@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
 import { google } from "googleapis";
+import adminRoutes from "./adminRoutes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envFile = path.join(__dirname, ".env");
@@ -79,8 +80,8 @@ app.use(
       callback(null, isAllowedOrigin(origin));
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-admin-key"],
   })
 );
 
@@ -91,8 +92,8 @@ app.options(/.*/, cors({
     callback(null, isAllowedOrigin(origin));
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-admin-key"],
 }));
 
 function createPasswordHash(password, salt = crypto.randomBytes(16).toString("hex")) {
@@ -647,35 +648,41 @@ function getSupabaseErrorMessage(error) {
 }
 
 function formatOrderEmail(order) {
-  const itemLines = order.items
-    .map(
-      (item) =>
-        `${item.name} (${item.category}) x ${item.quantity} - Rs. ${item.lineTotal}`
-    )
-    .join("\n");
+  const productsList = order.items
+    .map((item) => `${item.name} x ${item.quantity}`)
+    .join(", ");
+
+  const orderDate = new Date().toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 
   return [
     `Hi ${order.customer_name},`,
     "",
-    "Thank you for placing your Memory Magnets order.",
+    "Thank you for your order with Magnet Memories! 💙",
     "",
-    `Order ID: ${order.id}`,
-    `Total: Rs. ${order.total_amount}`,
-    "UPI payment ID: yashihihi@ibl",
+    "We're excited to let you know that your order has been successfully received.",
     "",
-    "Items:",
-    itemLines,
+    "Order Details",
     "",
-    "Delivery address:",
-    order.delivery_address,
+    `- Order ID: ${order.id}`,
+    `- Order Date: ${orderDate}`,
+    `- Items Ordered: ${productsList}`,
+    `- Total Amount: ₹${order.total_amount}`,
     "",
-    order.notes ? `Order notes:\n${order.notes}\n` : "",
-    "We will contact you soon for the next steps.",
+    "Our team will begin preparing your order with care. Once it's ready and shipped, it'll be updated on the portal.",
     "",
-    "The Memory Magnets",
-  ]
-    .filter(Boolean)
-    .join("\n");
+    "If you have any questions or need to make changes to your order, simply check for the feedback section on the website for further assistance!",
+    "",
+    "Thank you for choosing Magnet Memories. We can't wait for you to receive your order!",
+    "",
+    "Warm regards,",
+    "",
+    "Team Magnet Memories",
+    "7042736597",
+  ].join("\n");
 }
 
 function formatEmailHeader(value) {
@@ -699,7 +706,7 @@ async function sendGmailMessage({ to, subject, text }) {
     const gmail = google.gmail({ version: "v1", auth: oauth2Client });
     const raw = Buffer.from(
       [
-        `From: "The Memory Magnets" <${gmailUser}>`,
+        `From: "Magnet Memories" <${gmailUser}>`,
         `To: ${formatEmailHeader(to)}`,
         `Subject: ${formatEmailHeader(subject)}`,
         "Content-Type: text/plain; charset=utf-8",
@@ -743,7 +750,7 @@ async function sendOrderConfirmationEmail(order, to) {
   try {
     const result = await sendGmailMessage({
       to,
-      subject: `Memory Magnets order confirmation ${order.id.slice(0, 8)}`,
+      subject: `Magnet Memories order confirmation ${order.id.slice(0, 8)}`,
       text: formatOrderEmail(order),
     });
 
@@ -767,6 +774,10 @@ async function sendOrderConfirmationEmail(order, to) {
     };
   }
 }
+
+app.locals.requestSupabaseTable = requestSupabaseTable;
+app.locals.updateSupabaseOrder = updateSupabaseOrder;
+app.use("/api/admin", adminRoutes);
 
 app.get("/api/health", (_request, response) => {
   response.json({ ok: true });
@@ -1228,10 +1239,9 @@ app.post("/api/orders", async (request, response) => {
   const deliveryAddress = String(request.body.deliveryAddress ?? "").trim();
   const notes = String(request.body.notes ?? "").trim();
   const payment = request.body.payment ?? {};
-  const paymentMethod = String(payment.method ?? "").trim();
-  const razorpayOrderId = String(payment.razorpayOrderId ?? "").trim();
-  const razorpayPaymentId = String(payment.razorpayPaymentId ?? "").trim();
-  const razorpaySignature = String(payment.razorpaySignature ?? "").trim();
+  const paymentMethod = String(payment.method ?? "manual_upi").trim();
+  const transactionId = String(payment.transactionId ?? "").trim();
+  const screenshotBase64 = payment.screenshot;
   const items = normalizeOrderItems(request.body.items);
 
   if (!customerName || !customerGmail || !customerPhone || !deliveryAddress) {
@@ -1247,34 +1257,24 @@ app.post("/api/orders", async (request, response) => {
   const totalAmount = items.reduce((sum, item) => sum + item.lineTotal, 0);
 
   try {
-    if (paymentMethod === "razorpay") {
-      if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
-        return response.status(400).json({
-          message: "Razorpay order, payment, and signature are required.",
+    let screenshotUrl = null;
+    if (screenshotBase64) {
+      const parsedImage = parseDataImageUrl(screenshotBase64);
+      if (parsedImage) {
+        const extension = getImageExtension(parsedImage.contentType);
+        const folder = `payments/${new Date().toISOString().slice(0, 10)}`;
+        const objectPath = `${folder}/${createId()}.${extension}`;
+        
+        screenshotUrl = await uploadSupabaseStorageObject({
+          bucketName: "order-photos",
+          objectPath,
+          contentType: parsedImage.contentType,
+          buffer: parsedImage.buffer,
         });
       }
-
-      const verified = verifyRazorpaySignature({
-        razorpayOrderId,
-        razorpayPaymentId,
-        razorpaySignature,
-      });
-
-      if (!verified) {
-        return response.status(400).json({
-          message: "Payment verification failed.",
-        });
-      }
-    } else if (paymentMethod === "manual_upi") {
-      // Manual UPI orders are saved after the customer scans the QR code.
-    } else {
-      return response.status(400).json({
-        message: "Choose Razorpay or manual UPI payment.",
-      });
     }
 
     const orderItems = await uploadOrderItemPhotos(items);
-    const now = new Date().toISOString();
     const order = await createSupabaseOrder({
       customer_user_id: customerUserId,
       customer_name: customerName,
@@ -1284,30 +1284,23 @@ app.post("/api/orders", async (request, response) => {
       delivery_address: deliveryAddress,
       notes: [
         notes,
-        paymentMethod ? `Payment method: ${paymentMethod}` : "",
-        razorpayOrderId ? `Razorpay order: ${razorpayOrderId}` : "",
-        razorpayPaymentId ? `Razorpay payment: ${razorpayPaymentId}` : "",
+        transactionId ? `UPI Transaction ID: ${transactionId}` : "",
+        screenshotUrl ? `Payment Screenshot: ${screenshotUrl}` : "",
       ]
         .filter(Boolean)
         .join("\n"),
       items: orderItems,
       total_amount: totalAmount,
       payment_method: paymentMethod,
-      razorpay_order_id: razorpayOrderId || null,
-      razorpay_payment_id: razorpayPaymentId || null,
-      payment_verified_at: paymentMethod === "razorpay" ? now : null,
-      status:
-        paymentMethod === "razorpay"
-          ? "payment_verified"
-          : "payment_submitted",
+      razorpay_order_id: null,
+      razorpay_payment_id: transactionId || null,
+      payment_verified_at: null,
+      status: "pending_payment_review",
     });
 
     const emailResult = await sendOrderConfirmationEmail(order, customerGmail);
     const updatedOrder = await updateSupabaseOrder(order.id, {
-      status:
-        paymentMethod === "razorpay"
-          ? "confirmed"
-          : "pending_payment_review",
+      status: "pending_payment_review",
       order_confirmed_at: new Date().toISOString(),
       confirmation_email_sent: emailResult.emailSent,
       confirmation_email_message: emailResult.emailMessage,
