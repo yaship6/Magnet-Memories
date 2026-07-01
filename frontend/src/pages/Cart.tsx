@@ -244,7 +244,7 @@ function Cart() {
                         Please pay <span className="font-black text-[#ce272a]">Rs. {total}</span> using any UPI app by scanning the QR code or sending directly to the UPI address below.
                       </p>
                       <p className="mt-3 break-all text-2xl font-black text-[#790405]">
-                        yashihihi@ibl
+                        gaurav.dubey8765@ibl
                       </p>
                     </div>
                   </div>
