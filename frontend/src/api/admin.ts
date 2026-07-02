@@ -2,8 +2,9 @@ import axios from "axios";
 import type { Order } from "./orders";
 
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL ?? "http://127.0.0.1:4000/api"}/admin`,
+  baseURL: `${(import.meta.env.VITE_API_URL ?? "http://127.0.0.1:4000/api").replace(/\/$/, "")}/admin`,
 });
+
 
 // Interceptor to add authorization key to all admin requests
 api.interceptors.request.use((config) => {
