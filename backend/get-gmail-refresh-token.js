@@ -7,6 +7,23 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Load .env file manually
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  const contents = fs.readFileSync(envPath, 'utf-8');
+  contents.split(/\r?\n/).forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) return;
+    const idx = trimmed.indexOf('=');
+    if (idx === -1) return;
+    const key = trimmed.slice(0, idx).trim();
+    const val = trimmed.slice(idx + 1).trim().replace(/^["']|["']$/g, '');
+    if (key && !process.env[key]) {
+      process.env[key] = val;
+    }
+  });
+}
+
 const CLIENT_ID = process.env.GMAIL_CLIENT_ID || 'YOUR_CLIENT_ID';
 const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET || 'YOUR_CLIENT_SECRET';
 const REDIRECT_URL = 'http://localhost:3000/oauth2callback';
@@ -18,6 +35,7 @@ const oauth2Client = new google.auth.OAuth2(
 );
 
 const scopes = ['https://www.googleapis.com/auth/gmail.send'];
+
 
 // Create a local server to handle the callback
 const server = http.createServer(async (req, res) => {
